@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu Terminal</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm/css/xterm.css">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            background:#111827;
+            font-family:Arial,Helvetica,sans-serif;
+            color:white;
+        }
+
+        header{
+            height:60px;
+            background:#1f2937;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:0 25px;
+        }
+
+        h2{
+            font-size:22px;
+        }
+
+        #terminal{
+            width:100%;
+            height:calc(100vh - 60px);
+            padding:10px;
+        }
+
+        button{
+            padding:10px 18px;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+            background:#dc2626;
+            color:white;
+        }
+
+        button:hover{
+            background:#b91c1c;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<header>
+
+    <h2>Ubuntu Virtual Lab</h2>
+
+    <button onclick="closeLab()">
+        Exit Lab
+    </button>
+
+</header>
+
+<div id="terminal"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm/lib/xterm.js"></script>
+
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+
+<script src="js/terminal.js"></script>
+
+</body>
+</html>

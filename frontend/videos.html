@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Course Videos</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#0f172a;
+    color:white;
+}
+
+header{
+    background:#1e293b;
+    padding:20px 35px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+header h1{
+    color:#60a5fa;
+}
+
+header a{
+    color:white;
+    text-decoration:none;
+    background:#2563eb;
+    padding:10px 18px;
+    border-radius:8px;
+}
+
+.container{
+    display:grid;
+    grid-template-columns:320px 1fr;
+    height:calc(100vh - 80px);
+}
+
+.sidebar{
+    background:#1e293b;
+    padding:20px;
+    overflow-y:auto;
+}
+
+.content{
+    background:#f8fafc;
+    color:#111827;
+    padding:25px;
+}
+
+.progress{
+    width:100%;
+    height:18px;
+    background:#d1d5db;
+    border-radius:20px;
+    overflow:hidden;
+    margin:15px 0;
+}
+
+.progress-bar{
+    height:100%;
+    width:0%;
+    background:#22c55e;
+    transition:.4s;
+}
+
+#videoList button{
+    width:100%;
+    padding:14px;
+    margin:8px 0;
+    border:none;
+    border-radius:8px;
+    background:#334155;
+    color:white;
+    cursor:pointer;
+    text-align:left;
+    transition:.3s;
+}
+
+#videoList button:hover{
+    background:#2563eb;
+}
+
+.active{
+    background:#2563eb !important;
+}
+
+.done{
+    color:#22c55e;
+    font-weight:bold;
+}
+
+iframe{
+    width:100%;
+    height:520px;
+    border:none;
+    border-radius:12px;
+}
+
+.complete-btn{
+    margin-top:20px;
+    padding:12px 22px;
+    border:none;
+    border-radius:8px;
+    background:#16a34a;
+    color:white;
+    cursor:pointer;
+    font-size:15px;
+}
+
+.complete-btn:hover{
+    background:#15803d;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1 id="courseTitle">Course Videos</h1>
+
+<a id="backBtn" href="#">← Back</a>
+
+</header>
+
+<div class="container">
+
+<div class="sidebar">
+
+<h2>Videos</h2>
+
+<div class="progress">
+<div id="bar" class="progress-bar"></div>
+</div>
+
+<p id="percent">0% Completed</p>
+
+<div id="videoList"></div>
+
+</div>
+
+<div class="content">
+
+<h2 id="title">Loading...</h2>
+
+<div id="player"></div>
+
+</div>
+
+</div>
+
+<script>
+
+const API="http://localhost:5000/api/videos";
+
+const params=new URLSearchParams(window.location.search);
+
+const course=params.get("course") || "linux";
+
+const titles={
+linux:"Linux Security",
+network:"Network Security",
+web:"Web Security",
+crypto:"Cryptography"
+};
+
+const courseMap={
+linux:1,
+network:2,
+web:3,
+crypto:4
+};
+
+const courseId=courseMap[course] || 1;
+
+document.getElementById("courseTitle").innerText=titles[course];
+
+document.getElementById("backBtn").href=
+"course.html?course="+course;
+
+const user=JSON.parse(localStorage.getItem("user"));
+
+let videos=[];
+
+let completed=new Set();
+
+let currentVideo=null;
+
+async function loadVideos(){
+
+try{
+
+const res=await fetch(API+"/"+courseId);
+
+const data=await res.json();
+
+videos=data.videos || [];
+
+renderList();
+
+if(videos.length){
+
+play(videos[0]);
+
+}
+
+}catch(err){
+
+document.getElementById("player").innerHTML=
+"<h2>Unable to load videos.</h2>";
+
+}
+
+}
+
+function renderList(){
+
+const list=document.getElementById("videoList");
+
+list.innerHTML="";
+
+videos.forEach(video=>{
+
+const done=completed.has(video.id);
+
+list.innerHTML+=`
+<button
+id="video-${video.id}"
+onclick="playById(${video.id})">
+
+<span class="${done?"done":""}">
+${done?"✔ ":""}
+${video.title}
+</span>
+
+<br>
+
+<small>${video.duration}</small>
+
+</button>
+`;
+
+});
+
+updateProgress();
+
+}
+
+function playById(id){
+
+const video=videos.find(v=>v.id===id);
+
+play(video);
+
+}
+
+function play(video){
+
+currentVideo=video;
+
+document.getElementById("title").innerText=video.title;
+
+document.querySelectorAll("#videoList button")
+.forEach(btn=>btn.classList.remove("active"));
+
+document.getElementById("video-"+video.id)
+.classList.add("active");
+
+document.getElementById("player").innerHTML=`
+<iframe
+src="https://www.youtube.com/embed/${video.youtube_id}"
+allowfullscreen>
+</iframe>
+
+<br><br>
+
+<button
+class="complete-btn"
+onclick="markCompleted(${video.id})">
+
+Mark as Completed ✓
+
+</button>
+`;
+}
+async function markCompleted(id){
+
+    completed.add(id);
+
+    renderList();
+
+    if(user){
+
+        try{
+
+            await fetch(API+"/complete",{
+
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+
+                    user_id:user.id,
+
+                    video_id:id
+
+                })
+
+            });
+
+        }catch(err){
+
+            console.log(err);
+
+        }
+
+    }
+
+    alert("Video marked as completed.");
+
+    const index=videos.findIndex(v=>v.id===id);
+
+    if(index!==-1 && index<videos.length-1){
+
+        play(videos[index+1]);
+
+    }
+
+}
+
+function updateProgress(){
+
+    const percent=Math.round(
+
+        (completed.size/Math.max(videos.length,1))*100
+
+    );
+
+    document.getElementById("bar").style.width=percent+"%";
+
+    document.getElementById("percent").innerHTML=
+
+        `Completed ${completed.size} of ${videos.length} Videos (${percent}%)`;
+
+}
+
+loadVideos();
+
+</script>
+
+</body>
+
+</html>

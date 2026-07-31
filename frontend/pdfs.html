@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Course PDFs</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#0f172a;
+    color:white;
+}
+
+header{
+    background:#1e293b;
+    padding:20px 35px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+header h1{
+    color:#60a5fa;
+}
+
+header a{
+    color:white;
+    text-decoration:none;
+    background:#2563eb;
+    padding:10px 18px;
+    border-radius:8px;
+}
+
+.container{
+    display:grid;
+    grid-template-columns:320px 1fr;
+    height:calc(100vh - 80px);
+}
+
+.sidebar{
+    background:#1e293b;
+    padding:20px;
+    overflow-y:auto;
+}
+
+.content{
+    background:#f8fafc;
+    color:#111827;
+    padding:25px;
+}
+
+.progress{
+    width:100%;
+    height:18px;
+    background:#d1d5db;
+    border-radius:20px;
+    overflow:hidden;
+    margin:15px 0;
+}
+
+.progress-bar{
+    width:0%;
+    height:100%;
+    background:#22c55e;
+    transition:.4s;
+}
+
+#pdfList button{
+    width:100%;
+    padding:14px;
+    margin:8px 0;
+    border:none;
+    border-radius:8px;
+    background:#334155;
+    color:white;
+    cursor:pointer;
+    text-align:left;
+}
+
+#pdfList button:hover{
+    background:#2563eb;
+}
+
+.active{
+    background:#2563eb !important;
+}
+
+.done{
+    color:#22c55e;
+    font-weight:bold;
+}
+
+iframe{
+    width:100%;
+    height:600px;
+    border:none;
+    border-radius:10px;
+}
+
+.complete-btn{
+    margin-top:20px;
+    padding:12px 20px;
+    border:none;
+    border-radius:8px;
+    background:#16a34a;
+    color:white;
+    cursor:pointer;
+}
+
+.complete-btn:hover{
+    background:#15803d;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1 id="courseTitle">Course PDFs</h1>
+
+<a id="backBtn" href="#">← Back</a>
+
+</header>
+
+<div class="container">
+
+<div class="sidebar">
+
+<h2>PDFs</h2>
+
+<div class="progress">
+<div id="bar" class="progress-bar"></div>
+</div>
+
+<p id="percent">0% Completed</p>
+
+<div id="pdfList"></div>
+
+</div>
+
+<div class="content">
+
+<h2 id="title">Loading...</h2>
+
+<div id="viewer"></div>
+
+</div>
+
+</div>
+
+<script>
+
+const API="http://localhost:5000/api/pdfs";
+
+const params=new URLSearchParams(window.location.search);
+
+const course=params.get("course") || "linux";
+
+const titles={
+    linux:"Linux Security",
+    network:"Network Security",
+    web:"Web Security",
+    crypto:"Cryptography"
+};
+
+const courseMap={
+    linux:1,
+    network:2,
+    web:3,
+    crypto:4
+};
+
+const courseId=courseMap[course] || 1;
+
+document.getElementById("courseTitle").innerText=titles[course];
+
+document.getElementById("backBtn").href="course.html?course="+course;
+
+const user=JSON.parse(localStorage.getItem("user"));
+
+let pdfs=[];
+
+let completed=new Set();
+
+let currentPdf=null;
+
+async function loadPDFs(){
+
+    try{
+
+        const res=await fetch(API+"/"+courseId);
+
+        const data=await res.json();
+
+        pdfs=data.pdfs || [];
+
+        renderList();
+
+        if(pdfs.length){
+
+            openPDF(pdfs[0]);
+
+        }
+
+    }catch(err){
+
+        document.getElementById("viewer").innerHTML=
+        "<h2>Unable to load PDFs.</h2>";
+
+    }
+
+}
+
+function renderList(){
+
+    const list=document.getElementById("pdfList");
+
+    list.innerHTML="";
+
+    pdfs.forEach(pdf=>{
+
+        const done=completed.has(pdf.id);
+
+        list.innerHTML+=`
+        <button
+            id="pdf-${pdf.id}"
+            onclick="openPDFById(${pdf.id})">
+
+            <span class="${done?'done':''}">
+            ${done?'✔ ':''}${pdf.title}
+            </span>
+
+        </button>
+        `;
+    });
+
+    updateProgress();
+
+}
+
+function openPDFById(id){
+
+    const pdf=pdfs.find(p=>p.id===id);
+
+    openPDF(pdf);
+
+}
+
+function openPDF(pdf){
+
+    currentPdf=pdf;
+
+    document.getElementById("title").innerText=pdf.title;
+
+    document.querySelectorAll("#pdfList button")
+        .forEach(btn=>btn.classList.remove("active"));
+
+    document.getElementById("pdf-"+pdf.id)
+        .classList.add("active");
+
+    document.getElementById("viewer").innerHTML=`
+        <iframe
+        src="http://localhost:5000/pdfs/${pdf.pdf_file}">
+        </iframe>
+
+        <br><br>
+
+        <button
+        class="complete-btn"
+        onclick="markCompleted(${pdf.id})">
+
+        Mark as Completed ✓
+
+        </button>
+    `;
+}
+async function markCompleted(id){
+
+    if(completed.has(id)){
+        return;
+    }
+
+    completed.add(id);
+
+    renderList();
+
+    if(user){
+
+        try{
+
+            await fetch(API+"/complete",{
+
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+
+                    user_id:user.id,
+
+                    pdf_id:id
+
+                })
+
+            });
+
+        }catch(err){
+
+            console.log(err);
+
+        }
+
+    }
+
+    alert("PDF marked as completed.");
+
+    const index=pdfs.findIndex(p=>p.id===id);
+
+    if(index!==-1 && index<pdfs.length-1){
+
+        openPDF(pdfs[index+1]);
+
+    }
+
+}
+
+function updateProgress(){
+
+    const percent=Math.round(
+
+        (completed.size/Math.max(pdfs.length,1))*100
+
+    );
+
+    document.getElementById("bar").style.width=percent+"%";
+
+    document.getElementById("percent").innerHTML=
+
+        `Completed ${completed.size} of ${pdfs.length} PDFs (${percent}%)`;
+
+}
+
+loadPDFs();
+
+</script>
+
+</body>
+
+</html>

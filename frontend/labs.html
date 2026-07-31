@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Virtual Lab</title>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#0f172a;
+}
+
+header{
+    background:#1e293b;
+    color:white;
+    padding:20px 40px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+header h2{
+    color:#60a5fa;
+}
+
+.back-btn{
+
+    text-decoration:none;
+    background:#2563eb;
+    color:white;
+    padding:10px 18px;
+    border-radius:8px;
+
+}
+
+.container{
+
+    display:flex;
+    height:calc(100vh - 80px);
+
+}
+
+.sidebar{
+
+    width:280px;
+    background:#1e293b;
+    padding:20px;
+
+}
+
+.sidebar h3{
+
+    color:white;
+    margin-bottom:20px;
+
+}
+
+.lab-btn{
+
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:8px;
+    background:#334155;
+    color:white;
+    cursor:pointer;
+    text-align:left;
+    font-size:15px;
+
+}
+
+.lab-btn:hover{
+
+    background:#2563eb;
+
+}
+
+.content{
+
+    flex:1;
+    background:#f8fafc;
+    padding:40px;
+    overflow:auto;
+
+}
+
+.content h2{
+
+    color:#111827;
+    margin-bottom:20px;
+
+}
+
+.content p{
+
+    margin-bottom:15px;
+    line-height:1.7;
+    color:#374151;
+
+}
+
+.content ol{
+
+    margin-left:25px;
+    line-height:2;
+
+}
+
+.content input{
+
+    width:320px;
+    padding:10px;
+    border:2px solid #ccc;
+    border-radius:8px;
+    font-size:15px;
+
+}
+
+.check-btn{
+
+    margin-left:10px;
+    padding:10px 18px;
+    background:#2563eb;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    transition:.3s;
+
+}
+
+.launch-btn{
+
+    margin-top:30px;
+    padding:14px 25px;
+    background:#16a34a;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+
+}
+
+.launch-btn:hover{
+
+    background:#15803d;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h2>Linux Virtual Lab</h2>
+
+<a id="backBtn" class="back-btn">← Back</a>
+
+</header>
+
+<div class="container">
+
+<div class="sidebar">
+
+<h3>Virtual Lab</h3>
+
+<button class="lab-btn" onclick="showLab()">
+
+Linux Virtual Lab
+
+</button>
+
+</div>
+
+<div class="content" id="content">
+
+<h2>Welcome</h2>
+
+<p>Select the Virtual Lab from the left.</p>
+
+</div>
+
+</div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+const course = params.get("course");
+
+document.getElementById("backBtn").href = "course.html?course=" + course;
+
+function showLab(){
+
+document.getElementById("content").innerHTML=`
+
+<h2>Linux Security Virtual Lab</h2>
+
+<p>
+Complete the following tasks in the Ubuntu terminal. After completing each task,
+enter your answer and click the <strong>Check</strong> button.
+</p>
+
+<h3>Instructions</h3>
+
+<ol>
+<li>Launch the Ubuntu Virtual Lab.</li>
+<li>Complete all three Linux tasks.</li>
+<li>Enter your answers in the boxes provided.</li>
+<li>Click the Check button beside each answer.</li>
+<li>Green means Correct.</li>
+<li>Red means Incorrect.</li>
+</ol>
+
+<br>
+
+<h3>Task 1</h3>
+
+<p>Display the present working directory.</p>
+
+<input
+id="answer1"
+type="text"
+placeholder="Enter answer">
+
+<button
+class="check-btn"
+id="btn1"
+onclick="checkQ1()">
+
+Check
+
+</button>
+
+<span id="msg1" style="margin-left:10px;"></span>
+
+<br><br>
+
+<h3>Task 2</h3>
+
+<p>Display the IP address of the Ubuntu container.</p>
+
+<input
+id="answer2"
+type="text"
+placeholder="Enter IP Address">
+
+<button
+class="check-btn"
+id="btn2"
+onclick="checkQ2()">
+
+Check
+
+</button>
+
+<span id="msg2" style="margin-left:10px;"></span>
+
+<br><br>
+
+<h3>Task 3</h3>
+
+<p>Display the username of the current user.</p>
+
+<input
+id="answer3"
+type="text"
+placeholder="Enter Username">
+
+<button
+class="check-btn"
+id="btn3"
+onclick="checkQ3()">
+
+Check
+
+</button>
+
+<span id="msg3" style="margin-left:10px;"></span>
+
+<br><br>
+
+<button
+class="launch-btn"
+onclick="startLab()">
+
+Launch Virtual Lab
+
+</button>
+
+`;
+
+}
+
+async function startLab(){
+
+const button=document.querySelector(".launch-btn");
+
+button.disabled=true;
+button.innerHTML="Launching Ubuntu...";
+
+try{
+
+const response=await fetch(
+"http://localhost:5000/api/labs/launch",
+{
+method:"POST"
+}
+);
+
+const data=await response.json();
+
+if(!data.success){
+
+alert("Unable to launch Ubuntu Lab");
+
+button.disabled=false;
+button.innerHTML="Launch Virtual Lab";
+
+return;
+
+}
+
+window.location.href=
+"terminal.html?container="+data.containerId;
+
+}
+catch(err){
+
+console.error(err);
+
+alert("Server Error");
+
+button.disabled=false;
+button.innerHTML="Launch Virtual Lab";
+
+}
+
+}
+function celebrate(element){
+
+    const rect = element.getBoundingClientRect();
+
+    confetti({
+        particleCount:120,
+        spread:90,
+        startVelocity:45,
+        origin:{
+            x:(rect.left + rect.width/2)/window.innerWidth,
+            y:(rect.top + rect.height/2)/window.innerHeight
+        }
+    });
+
+}
+
+function success(input, button, messageId){
+
+    input.style.border = "3px solid #16a34a";
+
+    button.style.background = "#16a34a";
+    button.innerHTML = "Correct ✓";
+
+    document.getElementById(messageId).innerHTML = `
+        <span style="color:#16a34a;font-weight:bold;">
+        </span>
+    `;
+
+    celebrate(input);   // <-- This must still be here
+}
+
+function failure(input, button, messageId, hint){
+
+    input.style.border = "3px solid #dc2626";
+
+    button.style.background = "#2563eb";
+    button.innerHTML = "Check";
+
+    document.getElementById(messageId).innerHTML = `
+        <span style="color:#dc2626;font-weight:bold;">
+            ❌ Wrong Answer
+        </span><br>
+        <span style="color:#f59e0b;">
+            💡 Hint: <code>${hint}</code>
+        </span>
+    `;
+}
+
+function checkQ1(){
+
+    const input=document.getElementById("answer1");
+    const button=document.getElementById("btn1");
+
+    if(input.value.trim()==="/"){
+
+        success(input,button, "msg1");
+
+    }
+
+    else{
+
+        failure(input, button, "msg1", "pwd");
+
+    }
+
+}
+
+function checkQ2(){
+
+    const input=document.getElementById("answer2");
+    const button=document.getElementById("btn2");
+
+    const ipRegex=/^(25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})(\.(25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})){3}$/;
+
+    if(ipRegex.test(input.value.trim())){
+
+        success(input,button, "msg2");
+
+    }
+
+    else{
+
+        failure(input, button, "msg2", "hostname -I");
+
+    }
+
+}
+
+function checkQ3(){
+
+    const input=document.getElementById("answer3");
+    const button=document.getElementById("btn3");
+
+    if(input.value.trim().toLowerCase()=="root"){
+
+        success(input,button, "msg3");
+
+    }
+
+    else{
+
+        failure(input, button, "msg3", "whoami");
+
+    }
+
+}
+</script>
+
+</body>
+</html>

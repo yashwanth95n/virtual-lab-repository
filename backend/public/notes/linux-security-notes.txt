@@ -1,0 +1,101 @@
+Linux Security Notes
+
+Linux is considered one of the most secure operating systems due to its strong permission model, user authentication, and open-source nature. It is widely used in enterprise servers, cloud environments, and cybersecurity because of its stability and built-in security features. However, maintaining security requires proper configuration and regular system administration.
+
+1. User Authentication
+
+Every user has a unique username and password.
+The root user has complete administrative privileges.
+The sudo command allows authorized users to perform administrative tasks without logging in as root.
+
+2. File Permissions
+
+Linux protects files using three permission types:
+
+Read (r): View file contents.
+Write (w): Modify file contents.
+Execute (x): Run a file as a program or script.
+
+Permissions are assigned to:
+
+Owner
+Group
+Others
+
+Commands:
+
+chmod – Change file permissions.
+chown – Change file ownership.
+ls -l – View file permissions.
+
+3. Password Security
+
+Use strong passwords with uppercase, lowercase, numbers, and special characters.
+Change passwords regularly using the passwd command.
+Never share passwords with unauthorized users.
+
+4. Software Updates
+
+Regularly update the operating system and installed packages to fix security vulnerabilities.
+
+Example:
+
+bash
+sudo apt update
+sudo apt upgrade
+
+
+5. Secure Remote Access
+
+Use SSH (Secure Shell) instead of insecure remote login methods.
+Disable root login over SSH whenever possible.
+Use SSH keys for stronger authentication.
+
+6. Firewall Protection
+
+A firewall controls incoming and outgoing network traffic.
+
+Ubuntu commonly uses **UFW (Uncomplicated Firewall)**.
+Enable the firewall and allow only required services.
+
+Example:
+
+bash
+sudo ufw enable
+sudo ufw status
+
+
+7. User and Group Management
+
+Create separate user accounts instead of sharing one account.
+Grant only the permissions necessary for a user's role (Principle of Least Privilege).
+Remove unused accounts promptly.
+
+8. File Encryption and Backup
+
+Encrypt sensitive files and data whenever possible.
+Take regular backups to protect against accidental deletion, hardware failure, or ransomware attacks.
+
+9. System Monitoring
+
+Monitor system activity to detect suspicious behavior.
+Useful commands include:
+
+top – View running processes.
+ps – Display active processes.
+journalctl – View system logs.
+last – Show recent user logins.
+
+10. Security Best Practices
+
+Keep Linux updated.
+Use strong passwords and enable multi-factor authentication where available.
+Limit root access and use sudo.
+Regularly review logs and system activity.
+Disable unnecessary services and ports.
+Install software only from trusted repositories.
+Perform regular backups and test recovery procedures.
+
+Conclusion
+
+Linux provides a secure environment through user authentication, file permissions, secure remote access, firewalls, and continuous updates. Following security best practices helps protect systems from unauthorized access, malware, and data loss, making Linux a reliable platform for servers, networking, and cybersecurity environments.

@@ -1,0 +1,13 @@
+Linux Basic Notes
+
+Linux is an open-source operating system widely used in servers, cloud computing, cybersecurity, networking, and software development. It is known for its stability, security, flexibility, and efficiency. Unlike proprietary operating systems, Linux allows users to view, modify, and distribute its source code. Different versions of Linux, called distributions (or distros), include Ubuntu, Debian, Fedora, CentOS, Kali Linux, and Red Hat Enterprise Linux, each designed for specific use cases.
+
+Linux uses a hierarchical file system where all files and directories are organized under the root directory (/). Important directories include /home for user files, /etc for configuration files, /bin for essential commands, and /var for log and variable data. Users interact with Linux through the Command Line Interface (CLI) using a terminal, although graphical interfaces are also available.
+
+Some commonly used Linux commands include pwd (display current directory), ls (list files), cd (change directory), mkdir (create directory), rm (remove files/directories), cp (copy files), mv (move or rename files), cat (view file contents), touch (create empty files), and chmod (change file permissions). User management commands such as useradd, passwd, and sudo help administrators manage accounts and permissions securely.
+
+Linux follows a permission-based security model. Every file has read (r), write (w), and execute (x) permissions assigned to the owner, group, and others. Proper permission management prevents unauthorized access and protects system resources.
+
+Processes in Linux can be monitored using commands like ps, top, and htop, while networking tools such as ping, ifconfig (or ip), and ssh are commonly used for communication and remote administration. Package managers like apt, yum, and dnf simplify software installation and updates.
+
+Overall, Linux is a powerful, reliable, and widely adopted operating system that provides excellent performance, strong security, and extensive customization, making it an essential platform for IT professionals, developers, system administrators, and cybersecurity practitioners.

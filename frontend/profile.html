@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile | Cyber Security Virtual Lab</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif}
+body{
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#0f172a,#1e3a8a);
+}
+.card{
+width:430px;
+background:rgba(15,23,42,.95);
+border:1px solid rgba(255,255,255,.08);
+border-radius:18px;
+padding:35px;
+box-shadow:0 15px 35px rgba(0,0,0,.45);
+color:#fff;
+}
+h2{text-align:center;margin-bottom:25px;color:#60a5fa}
+.avatar{
+width:90px;height:90px;border-radius:50%;
+background:#2563eb;
+display:flex;align-items:center;justify-content:center;
+font-size:38px;margin:0 auto 20px;
+}
+label{display:block;margin:15px 0 8px;font-size:14px}
+input{
+width:100%;
+padding:12px;
+border-radius:10px;
+border:1px solid #334155;
+background:#1e293b;
+color:#fff;
+outline:none;
+}
+input:focus{border-color:#60a5fa}
+button{
+width:100%;
+padding:12px;
+margin-top:12px;
+border:none;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+transition:.25s;
+}
+.primary{background:#2563eb;color:#fff}
+.primary:hover{background:#1d4ed8}
+.secondary{background:#16a34a;color:#fff}
+.secondary:hover{background:#15803d}
+.back{
+display:block;
+text-align:center;
+margin-top:18px;
+color:#93c5fd;
+text-decoration:none;
+}
+</style>
+</head>
+<body>
+<div class="card">
+<div class="avatar">👤</div>
+<h2>My Profile</h2>
+
+<label>Full Name</label>
+<input id="fullName">
+<button class="secondary" onclick="updateName()">Update Name</button>
+
+<label>Email</label>
+<input id="email">
+<button class="secondary" onclick="updateEmail()">Update Email</button>
+
+<label>Current Password</label>
+<input type="password" id="currentPassword">
+
+<label>New Password</label>
+<input type="password" id="newPassword">
+
+<label>Confirm Password</label>
+<input type="password" id="confirmPassword">
+
+<button class="primary" onclick="updatePassword()">Update Password</button>
+
+<a class="back" href="home.html">← Back to Home</a>
+</div>
+
+<script>
+const API_URL="http://localhost:5000/api/auth";
+const user=JSON.parse(localStorage.getItem("user"));
+if(!user){location.href="login.html";}
+fullName.value=user.full_name;
+email.value=user.email;
+
+async function updateName(){
+const r=await fetch(API_URL+"/profile/name",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:user.id,full_name:fullName.value})});
+const d=await r.json();alert(d.message);
+if(d.success){user.full_name=fullName.value;localStorage.setItem("user",JSON.stringify(user));}
+}
+async function updateEmail(){
+const r=await fetch(API_URL+"/profile/email",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:user.id,email:email.value})});
+const d=await r.json();alert(d.message);
+if(d.success){user.email=email.value;localStorage.setItem("user",JSON.stringify(user));}
+}
+async function updatePassword(){
+if(newPassword.value!==confirmPassword.value){alert("Passwords do not match.");return;}
+const r=await fetch(API_URL+"/profile/password",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:user.id,currentPassword:currentPassword.value,newPassword:newPassword.value})});
+const d=await r.json();alert(d.message);
+if(d.success){currentPassword.value="";newPassword.value="";confirmPassword.value="";}
+}
+</script>
+</body>
+</html>
