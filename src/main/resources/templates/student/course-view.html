@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><title th:text="${course.title}">Course</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    .viewer-frame{width:100%;max-width:960px;margin:0 auto}
+    .viewer-frame iframe{width:100%;height:70vh;min-height:480px;border:1px solid #e2e8f0;border-radius:12px;background:#fff}
+    .viewer-frame video{width:100%;max-height:70vh;border-radius:12px;background:#000;display:block}
+  </style>
+</head>
+<body class="course-layout">
+  <aside class="course-sidebar">
+    <div class="course-sidebar-head">
+      <a th:href="@{/student/courses}" class="back-link">← Courses</a>
+      <h3 th:text="${course.title}">Course</h3>
+      <p class="text-sm text-muted" th:text="${course.category}">Branch</p>
+    </div>
+    <nav class="course-toc">
+      <a th:each="m,stat : ${materials}"
+         th:href="@{/student/course/{cid}/material/{mid}(cid=${course.id},mid=${m.id})}"
+         th:classappend="${(focusId != null and focusId == m.id) or (focusId == null and stat.first)} ? 'done' : (${completedIds.contains(m.id)} ? 'done' : '')">
+        <span class="toc-num" th:text="${stat.count}">1</span>
+        <span th:text="${m.title}">Material</span>
+        <span th:if="${completedIds.contains(m.id)}" class="toc-check">✓</span>
+      </a>
+    </nav>
+  </aside>
+  <div class="course-main">
+    <header class="topbar">
+      <h1 th:text="${course.title}">Course</h1>
+    </header>
+    <div class="content">
+      <!-- Only show ONE material at a time -->
+      <div th:each="m : ${materials}"
+           th:if="${focusId != null ? focusId == m.id : materials.size() > 0 and materials[0].id == m.id}"
+           class="material-block viewer-frame">
+        <div class="material-head">
+          <h3>
+            <span class="badge badge-draft" th:text="${m.type}">PDF</span>
+            <span th:text="${m.title}">Title</span>
+          </h3>
+          <span th:if="${completedIds.contains(m.id)}" class="badge badge-active">Completed</span>
+        </div>
+
+        <div th:if="${m.type == 'VIDEO' and m.filePath != null}">
+          <video th:src="${m.filePath}" controls controlsList="nodownload"
+                 th:attr="data-mid=${m.id},data-cid=${course.id}"
+                 onended="markVideoDone(this)"
+                 oncontextmenu="return false"
+                 style="width:100%;max-height:70vh;background:#000;border-radius:12px"></video>
+          <p class="hint">Marks complete when the video ends.</p>
+        </div>
+
+        <!--
+          PDF viewing block (STUDENT SIDE ONLY).
+          #toolbar=0&navpanes=0 hides the built-in browser PDF viewer's
+          download/print icons (Chrome/Edge/Firefox). Deterrent only --
+          does not block Ctrl+P, devtools, or screenshots.
+          NOTE: no `sandbox` attribute on the iframe -- adding one blocks
+          Chrome's PDF renderer entirely ("This page has been blocked by Chrome").
+        -->
+        <div th:if="${m.type == 'PDF' and m.filePath != null}"
+             class="pdf-guard" oncontextmenu="return false">
+          <iframe th:src="${m.filePath + '#toolbar=0&navpanes=0&scrollbar=1'}"
+                  title="PDF"></iframe>
+          <div class="mt-2">
+            <!-- "Open in new tab" link intentionally removed: it linked
+                 straight to the raw file, bypassing the toolbar restriction. -->
+            <form th:if="${!completedIds.contains(m.id)}"
+                  th:action="@{/student/course/{cid}/material/{mid}/complete(cid=${course.id},mid=${m.id})}"
+                  method="post" style="display:inline">
+              <button type="submit" class="btn btn-primary btn-sm">Mark completed</button>
+            </form>
+          </div>
+        </div>
+
+        <div th:if="${m.type == 'NOTE'}">
+          <pre th:text="${m.content}" style="white-space:pre-wrap;background:#f8fafc;padding:16px;border-radius:12px;max-height:70vh;overflow:auto"
+               oncontextmenu="return false"></pre>
+          <form th:if="${!completedIds.contains(m.id)}"
+                th:action="@{/student/course/{cid}/material/{mid}/complete(cid=${course.id},mid=${m.id})}"
+                method="post" class="mt-2">
+            <button type="submit" class="btn btn-primary btn-sm">Mark completed</button>
+          </form>
+        </div>
+      </div>
+      <div th:if="${#lists.isEmpty(materials)}" class="text-muted">No materials yet.</div>
+    </div>
+  </div>
+  <script th:src="@{/js/pdf-guard.js}"></script>
+  <script>
+    function markVideoDone(el) {
+      fetch('/student/course/' + el.getAttribute('data-cid') + '/material/' + el.getAttribute('data-mid') + '/complete', {method:'POST'})
+        .then(() => location.reload());
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title>Exams</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body>
+<div th:replace="~{fragments/layout :: student-sidebar(${activePage})}"></div>
+<div class="main">
+  <div th:replace="~{fragments/layout :: topbar('Exams', ${student})}"></div>
+  <div class="content">
+    <div th:if="${param.done}" class="form-card" style="background:#d1fae5;color:#065f46;margin-bottom:16px">Exam submitted.</div>
+    <div class="course-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div th:each="e : ${exams}" class="course-card">
+        <div class="card-art art-purple" th:if="${e.coverImage == null}"><span>📝</span></div>
+        <div class="card-art" th:if="${e.coverImage != null}" style="padding:0;overflow:hidden">
+          <img th:src="${e.coverImage}" style="width:100%;height:140px;object-fit:cover" alt=""/>
+        </div>
+        <div class="card-body">
+          <h3>
+            <span class="badge badge-published" style="margin-right:6px" th:text="'EX' + ${e.id}">EX1</span>
+            <span th:text="${e.title}">Exam</span>
+          </h3>
+          <div class="card-meta" th:text="${e.durationMinutes + ' minutes · ' + e.branch}">60 min</div>
+          <div class="card-footer">
+            <span class="badge badge-published">Exam</span>
+            <a th:if="${used.get(e.id) == null or used.get(e.id) < e.maxAttempts}"
+               th:href="@{/student/exams/{id}/start(id=${e.id})}" class="btn btn-primary btn-sm">Start exam</a>
+            <span th:unless="${used.get(e.id) == null or used.get(e.id) < e.maxAttempts}" class="badge badge-suspended">Locked</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p th:if="${#lists.isEmpty(exams)}" class="text-muted">No exams for your branch.</p>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Sign in · Ledger LMS</title>
+  <link rel="stylesheet" th:href="@{/css/auth.css}"/>
+</head>
+<body class="auth-page">
+  <div class="auth-card">
+    <div class="auth-card-left">
+      <h1>WELCOME</h1>
+      <h2>Ledger LMS</h2>
+      <p>Access your courses, labs, quizzes and exams in one place. Learn at your own pace.</p>
+    </div>
+    <div class="auth-card-right">
+      <h2>Sign in</h2>
+      <p class="sub">Student portal</p>
+      <div th:if="${error}" class="auth-error" th:text="${error}"></div>
+      <div th:if="${success}" class="auth-success" th:text="${success}"></div>
+      <form method="post" th:action="@{/student/login}">
+        <div class="auth-field">
+          <label>Email</label>
+          <div class="auth-input-wrap">
+            <span class="ico">✉</span>
+            <input class="auth-input" type="email" name="email" placeholder="you@college.edu" required/>
+          </div>
+        </div>
+        <div class="auth-field">
+          <label>Password</label>
+          <div class="auth-input-wrap">
+            <span class="ico">🔒</span>
+            <input class="auth-input" type="password" name="password" placeholder="Password" required/>
+          </div>
+        </div>
+        <div class="auth-check">
+          <label><input type="checkbox"/> Remember me</label>
+          <a th:href="@{/student/reset-password}">Forgot password?</a>
+        </div>
+        <button type="submit" class="auth-btn">Sign in</button>
+      </form>
+       <div class="auth-divider" style="margin:16px 0;text-align:center;color:#94a3b8">or</div>
+      <button type="button" id="googleBtn" class="auth-btn-outline" style="width:100%">Continue with Google</button>
+      <form id="googleForm" method="post" th:action="@{/auth/google}" style="display:none">
+        <input type="hidden" name="email" id="gEmail"/>
+        <input type="hidden" name="name" id="gName"/>
+        <input type="hidden" name="idToken" id="gToken"/>
+        <input type="hidden" name="role" value="STUDENT"/>
+        <input type="hidden" name="portal" value="student"/>
+      </form>
+      <p class="auth-links">Don't have an account? <a th:href="@{/student/register}">Sign up</a></p>
+    </div>
+  </div>
+
+     
+      <script type="module" th:inline="javascript">
+        /*<![CDATA[*/
+        const apiKey = /*[[${firebaseApiKey}]]*/ '';
+        const authDomain = /*[[${firebaseAuthDomain}]]*/ '';
+        const projectId = /*[[${firebaseProjectId}]]*/ '';
+        const appId = /*[[${firebaseAppId}]]*/ '';
+        if (apiKey && apiKey.length > 10 && !apiKey.startsWith('PASTE_') && !apiKey.startsWith('YOUR_')) {
+          import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js').then(async ({ initializeApp }) => {
+            const { getAuth, GoogleAuthProvider, signInWithPopup } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+            const app = initializeApp({ apiKey, authDomain, projectId, appId });
+            const auth = getAuth(app);
+            document.getElementById('googleBtn').onclick = async () => {
+              try {
+                const result = await signInWithPopup(auth, new GoogleAuthProvider());
+                const user = result.user;
+                const token = await user.getIdToken();
+                document.getElementById('gEmail').value = user.email || '';
+                document.getElementById('gName').value = user.displayName || '';
+                document.getElementById('gToken').value = token;
+                document.getElementById('googleForm').submit();
+              } catch (e) { alert('Google sign-in failed: ' + e.message); }
+            };
+          });
+        } else {
+          document.getElementById('googleBtn').onclick = () => alert('Add Web API keys in src/main/resources/firebase-web-config.json');
+        }
+        /*]]>*/
+      </script>
+
+</body>
+</html>

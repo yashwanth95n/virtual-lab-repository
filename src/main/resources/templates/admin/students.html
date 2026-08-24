@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Students · Ledger LMS</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+  <div th:replace="~{fragments/layout :: admin-sidebar(${activePage})}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Students', ${admin})}"></div>
+    <div class="content">
+      <div class="toolbar">
+        <div>
+          <label class="text-sm text-muted">Department</label><br/>
+          <select onchange="location=this.value">
+            <option value="/admin/students">All</option>
+            <option value="/admin/students?department=Computer Science">Computer Science</option>
+            <option value="/admin/students?department=Design">Design</option>
+            <option value="/admin/students?department=Business">Business</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm text-muted">Batch</label><br/>
+          <select onchange="location=this.value">
+            <option value="/admin/students">All</option>
+            <option value="/admin/students?batch=2024">2024</option>
+            <option value="/admin/students?batch=2023">2023</option>
+            <option value="/admin/students?batch=2022">2022</option>
+          </select>
+        </div>
+        <input type="search" class="search-box" placeholder="Search by name, email, or roll no."/>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Roll No.</th>
+              <th>Dept · Batch · Section</th>
+              <th>Progress</th>
+              <th>Grade</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="s : ${students}">
+              <td>
+                <div class="user-cell">
+                  <span class="uname" th:text="${s.name}">Name</span>
+                  <span class="uemail" th:text="${s.email}">email</span>
+                </div>
+              </td>
+              <td th:text="${s.rollNo}">CS24-014</td>
+              <td th:text="${s.department + ' · ' + s.batch + ' · ' + s.section}">CS · 2024 · A</td>
+              <td>
+                <div class="progress-wrap">
+                  <div class="progress-bar">
+                    <div class="progress-fill" th:style="'width:' + ${progressMap.get(s.id)} + '%'"></div>
+                  </div>
+                  <span th:text="${progressMap.get(s.id) + '%'}">62%</span>
+                </div>
+              </td>
+              <td th:text="${gradeMap.get(s.id)}">B+</td>
+              <td>
+                <span class="badge"
+                      th:classappend="${s.status == 'Active'} ? 'badge-active' : (${s.status == 'Invited'} ? 'badge-invited' : (${s.status == 'Suspended'} ? 'badge-suspended' : 'badge-inactive'))"
+                      th:text="${s.status}">Active</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

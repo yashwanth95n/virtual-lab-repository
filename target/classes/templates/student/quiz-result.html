@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><title>Quiz Result</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+  <div th:replace="~{fragments/layout :: student-sidebar(${activePage})}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Quiz Result', ${student})}"></div>
+    <div class="content">
+      <div class="form-card" style="text-align:center;margin-bottom:16px;">
+        <h2 th:text="${quiz.title}">Quiz</h2>
+        <p style="font-size:2rem;font-weight:700;" th:text="${score + ' / ' + total}">0/0</p>
+        <p th:text="${percent + '% · Result ' + letterResult}">90% · A</p>
+        <div class="flex gap-2" style="justify-content:center;margin-top:16px;">
+          <a th:if="${percent < 70}"
+   th:href="@{/student/quiz/{id}(id=${quiz.id})}"
+   class="btn btn-outline">
+    Retake
+</a>
+          <a th:href="@{/student/assessments}" class="btn btn-primary">Done</a>
+        </div>
+      </div>
+      <div class="table-card">
+        <h3>Answer review</h3>
+        <table>
+          <thead><tr><th>Question</th><th>Yours</th><th>Correct</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr th:each="r : ${review}">
+              <td th:text="${r.question}">Q</td>
+              <td th:text="${r.yourAnswer}">A</td>
+              <td th:text="${r.correctAnswer}">A</td>
+              <td>
+                <span class="badge" th:classappend="${r.ok} ? 'badge-active' : 'badge-suspended'"
+                      th:text="${r.ok} ? 'Correct' : 'Wrong'">OK</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

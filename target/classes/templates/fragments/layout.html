@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/></head>
+<body>
+
+<!-- ============================================================
+     Icon set — plain inline SVG, stroke="currentColor" so every
+     icon automatically matches its parent's text color/state
+     (grey → white on hover → white on active), instead of
+     carrying its own fixed emoji color.
+     ============================================================ -->
+
+<aside th:fragment="admin-sidebar(activePage)" class="sidebar">
+  <div class="sidebar-logo">
+    <span class="icon">V</span>
+    <div class="logo-text">
+      <span class="logo-title">Virtual Lab Repository</span>
+      <span class="logo-tag">Admin Console</span>
+    </div>
+  </div>
+  <nav>
+    <div class="nav-group-label">Overview</div>
+    <a th:href="@{/admin/dashboard}" th:classappend="${activePage == 'dashboard'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.6" y="2.6" width="6" height="6" rx="1.2"/><rect x="11.4" y="2.6" width="6" height="6" rx="1.2"/><rect x="2.6" y="11.4" width="6" height="6" rx="1.2"/><rect x="11.4" y="11.4" width="6" height="6" rx="1.2"/></svg></span>
+      Dashboard
+    </a>
+
+    <div class="nav-group-label">Academics</div>
+    <a th:href="@{/admin/users}" th:classappend="${activePage == 'users'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="6.6" r="3.1"/><path d="M3.6 17c1-3.3 3.9-5 6.4-5s5.4 1.7 6.4 5"/></svg></span>
+      Users
+    </a>
+    <a th:href="@{/admin/courses}" th:classappend="${activePage == 'courses'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4c1.8-.9 4.1-.9 6 0v12c-1.9-.9-4.2-.9-6 0V4Z"/><path d="M17 4c-1.8-.9-4.1-.9-6 0v12c1.9-.9 4.2-.9 6 0V4Z"/></svg></span>
+      Courses
+    </a>
+    <a th:href="@{/admin/branches}" th:classappend="${activePage == 'branches'} ? 'active'">
+      <span class="nav-icon">📚</span>
+      Course
+    </a>
+    <a th:href="@{/admin/enrollments}" th:classappend="${activePage == 'enrollments'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4.2" y="3.6" width="11.6" height="13.6" rx="1.5"/><rect x="7.3" y="2.2" width="5.4" height="2.8" rx="1"/><line x1="6.7" y1="9" x2="13.3" y2="9"/><line x1="6.7" y1="12" x2="13.3" y2="12"/><line x1="6.7" y1="15" x2="10.8" y2="15"/></svg></span>
+      Enrollments
+    </a>
+    <a th:href="@{/admin/assessments}" th:classappend="${activePage == 'assessments'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.8 5.6 5.1 6.9 7.6 4.4"/><line x1="9.6" y1="5.6" x2="16.4" y2="5.6"/><path d="M3.8 10.4 5.1 11.7 7.6 9.2"/><line x1="9.6" y1="10.4" x2="16.4" y2="10.4"/><path d="M3.8 15.2 5.1 16.5 7.6 14"/><line x1="9.6" y1="15.2" x2="16.4" y2="15.2"/></svg></span>
+      Assessments
+    </a>
+    <a th:href="@{/admin/labs}" th:classappend="${activePage == 'labs'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.6h4"/><path d="M8.6 2.6v5.3L4.3 15c-.6 1 .1 2.4 1.3 2.4h8.8c1.2 0 1.9-1.4 1.3-2.4L11.4 7.9V2.6"/><line x1="6.8" y1="12.2" x2="13.2" y2="12.2"/></svg></span>
+      Labs
+    </a>
+    <a th:href="@{/admin/submissions}" th:classappend="${activePage == 'submissions'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13.2V4.4"/><path d="M6.6 7.8 10 4.4l3.4 3.4"/><path d="M4.2 14.4v1.8c0 .9.7 1.6 1.6 1.6h8.4c.9 0 1.6-.7 1.6-1.6v-1.8"/></svg></span>
+      Submissions
+    </a>
+
+    <div class="nav-group-label">Tools</div>
+    <a th:href="@{/admin/lab}" th:classappend="${activePage == 'lab'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.6" y="4.2" width="14.8" height="9.6" rx="1.4"/><line x1="7.2" y1="17.4" x2="12.8" y2="17.4"/><line x1="10" y1="13.8" x2="10" y2="17.4"/></svg></span>
+      Lab VM
+    </a>
+
+    <div class="nav-group-label">Insights</div>
+    <a th:href="@{/admin/reports}" th:classappend="${activePage == 'reports'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="3.6" y1="16.6" x2="16.4" y2="16.6"/><rect x="4.4" y="10.4" width="2.8" height="6.2"/><rect x="8.6" y="6.4" width="2.8" height="10.2"/><rect x="12.8" y="3.4" width="2.8" height="13.2"/></svg></span>
+      Reports
+    </a>
+    <a th:href="@{/admin/chat}" th:classappend="${activePage == 'chat'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 4.9c0-.9.7-1.6 1.6-1.6h9.6c.9 0 1.6.7 1.6 1.6v6.5c0 .9-.7 1.6-1.6 1.6H8.7l-3.5 2.7v-2.7H5.2c-.9 0-1.6-.7-1.6-1.6V4.9Z"/></svg></span>
+      Chat
+    </a>
+    <a th:href="@{/admin/notifications}" th:classappend="${activePage == 'notifications'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.1 8.3c0-2.3 1.7-4.1 3.9-4.1s3.9 1.8 3.9 4.1v3l1.3 2.2H4.8l1.3-2.2V8.3Z"/><path d="M8.5 15.5a1.6 1.6 0 0 0 3 0"/></svg></span>
+      Notifications
+    </a>
+
+    <div class="nav-group-label">System</div>
+    <a th:href="@{/admin/settings}" th:classappend="${activePage == 'profile'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.5"/><path d="M10 3.4v1.5M10 15.1v1.5M16.6 10h-1.5M4.9 10H3.4M14.8 5.2l-1.1 1.1M6.3 13.7l-1.1 1.1M14.8 14.8l-1.1-1.1M6.3 6.3 5.2 5.2"/></svg></span>
+      Profile
+    </a>
+  </nav>
+  <div style="padding:12px 16px">
+    <a th:href="@{/logout(portal='admin')}" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;color:#fca5a5;font-weight:600;text-decoration:none">
+      <span>⎋</span> Logout
+    </a>
+  </div>
+  <div class="sidebar-footer">Virtual Lab Repository · Admin · v1.3</div>
+</aside>
+
+<aside th:fragment="student-sidebar(activePage)" class="sidebar">
+  <div class="sidebar-logo">
+    <span class="icon">V</span>
+    <div class="logo-text">
+      <span class="logo-title">Virtual Lab Repository</span>
+      <span class="logo-tag">Student Portal</span>
+    </div>
+  </div>
+  <nav>
+    <div class="nav-group-label">Overview</div>
+    <a th:href="@{/student/dashboard}" th:classappend="${activePage == 'dashboard'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.6" y="2.6" width="6" height="6" rx="1.2"/><rect x="11.4" y="2.6" width="6" height="6" rx="1.2"/><rect x="2.6" y="11.4" width="6" height="6" rx="1.2"/><rect x="11.4" y="11.4" width="6" height="6" rx="1.2"/></svg></span>
+      Dashboard
+    </a>
+
+    <div class="nav-group-label">Learning</div>
+    <a th:href="@{/student/courses}" th:classappend="${activePage == 'courses'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4c1.8-.9 4.1-.9 6 0v12c-1.9-.9-4.2-.9-6 0V4Z"/><path d="M17 4c-1.8-.9-4.1-.9-6 0v12c1.9-.9 4.2-.9 6 0V4Z"/></svg></span>
+      Courses
+    </a>
+    <a th:href="@{/student/assessments}" th:classappend="${activePage == 'assessments'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.8 5.6 5.1 6.9 7.6 4.4"/><line x1="9.6" y1="5.6" x2="16.4" y2="5.6"/><path d="M3.8 10.4 5.1 11.7 7.6 9.2"/><line x1="9.6" y1="10.4" x2="16.4" y2="10.4"/><path d="M3.8 15.2 5.1 16.5 7.6 14"/><line x1="9.6" y1="15.2" x2="16.4" y2="15.2"/></svg></span>
+      Assessments
+    </a>
+    <a th:href="@{/student/labs}" th:classappend="${activePage == 'labs'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.6h4"/><path d="M8.6 2.6v5.3L4.3 15c-.6 1 .1 2.4 1.3 2.4h8.8c1.2 0 1.9-1.4 1.3-2.4L11.4 7.9V2.6"/><line x1="6.8" y1="12.2" x2="13.2" y2="12.2"/></svg></span>
+      Labs
+    </a>
+
+    <div class="nav-group-label">Insights</div>
+    <a th:href="@{/student/reports}" th:classappend="${activePage == 'reports'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="3.6" y1="16.6" x2="16.4" y2="16.6"/><rect x="4.4" y="10.4" width="2.8" height="6.2"/><rect x="8.6" y="6.4" width="2.8" height="10.2"/><rect x="12.8" y="3.4" width="2.8" height="13.2"/></svg></span>
+      Reports
+    </a>
+    <a th:href="@{/student/chat}" th:classappend="${activePage == 'chat'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 4.9c0-.9.7-1.6 1.6-1.6h9.6c.9 0 1.6.7 1.6 1.6v6.5c0 .9-.7 1.6-1.6 1.6H8.7l-3.5 2.7v-2.7H5.2c-.9 0-1.6-.7-1.6-1.6V4.9Z"/></svg></span>
+      Chat
+    </a>
+
+    <div class="nav-group-label">System</div>
+    <a th:href="@{/student/settings}" th:classappend="${activePage == 'profile'} ? 'active'">
+      <span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.5"/><path d="M10 3.4v1.5M10 15.1v1.5M16.6 10h-1.5M4.9 10H3.4M14.8 5.2l-1.1 1.1M6.3 13.7l-1.1 1.1M14.8 14.8l-1.1-1.1M6.3 6.3 5.2 5.2"/></svg></span>
+      Profile
+    </a>
+  </nav>
+  <div style="padding:12px 16px">
+    <a th:href="@{/logout(portal='student')}" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;color:#fca5a5;font-weight:600;text-decoration:none">
+      <span>⎋</span> Logout
+    </a>
+  </div>
+  <div class="sidebar-footer">Virtual Lab Repository · Student</div>
+</aside>
+
+<header th:fragment="topbar(title, user)" class="topbar">
+  <h1 th:text="${title}">Page</h1>
+  <div class="user-chip">
+    <a th:if="${user != null and user.role == 'STUDENT'}" th:href="@{/student/notifications}" class="notif-btn" title="Notifications">
+      <span class="notif-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.1 8.3c0-2.3 1.7-4.1 3.9-4.1s3.9 1.8 3.9 4.1v3l1.3 2.2H4.8l1.3-2.2V8.3Z"/><path d="M8.5 15.5a1.6 1.6 0 0 0 3 0"/></svg></span>
+      <span class="dot" th:if="${unreadChat != null and unreadChat > 0}"></span>
+    </a>
+    <a th:if="${user != null and user.role == 'ADMIN'}" th:href="@{/admin/notifications}" class="notif-btn" title="Notifications">
+      <span class="notif-ico"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.1 8.3c0-2.3 1.7-4.1 3.9-4.1s3.9 1.8 3.9 4.1v3l1.3 2.2H4.8l1.3-2.2V8.3Z"/><path d="M8.5 15.5a1.6 1.6 0 0 0 3 0"/></svg></span>
+    </a>
+
+    <div class="chip-divider"></div>
+
+    <div class="profile-pill">
+      <div class="avatar" th:text="${user != null ? #strings.substring(user.name,0,1) : 'A'}">A</div>
+      <div class="user-meta">
+        <div class="name" th:text="${user != null ? user.name : 'User'}">User</div>
+        <div class="role" th:text="${user != null ? user.role : ''}">Role</div>
+      </div>
+    </div>
+
+    <a th:if="${user != null and user.role == 'ADMIN'}" th:href="@{/logout(portal='admin')}" class="logout-btn">Logout</a>
+    <a th:if="${user != null and user.role == 'STUDENT'}" th:href="@{/logout(portal='student')}" class="logout-btn">Logout</a>
+  </div>
+</header>
+</body>
+</html>

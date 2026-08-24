@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><title>Reset password</title>
+  <link rel="stylesheet" th:href="@{/css/auth.css}"/>
+</head>
+<body class="auth-body">
+  <div class="auth-card">
+    <h1>Reset password</h1>
+    <p th:if="${error}" style="color:#b91c1c" th:text="${error}"></p>
+    <p th:if="${success}" style="color:#047857" th:text="${success}"></p>
+    <form method="post" th:action="@{/student/reset-password}">
+      <div class="auth-field"><label>Email</label>
+        <input class="auth-input" type="email" name="email" required/></div>
+      <div class="auth-field"><label>New password (6–16)</label>
+        <input class="auth-input" type="password" name="password" minlength="6" maxlength="16" required/></div>
+      <button type="submit" class="auth-btn">Update password</button>
+    </form>
+    <p class="auth-links"><a th:href="@{/student/login}">Back to sign in</a></p>
+  </div>
+</body>
+</html>

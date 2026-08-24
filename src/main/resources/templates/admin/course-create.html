@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Create Course · Ledger LMS</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+  <div th:replace="~{fragments/layout :: admin-sidebar(${activePage})}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Create Course', ${admin})}"></div>
+    <div class="content">
+      <div class="form-card">
+        <form method="post" th:action="@{/admin/courses/create}" enctype="multipart/form-data">
+          <div class="form-group">
+            <label>Course Title *</label>
+            <input type="text" name="title" required/>
+          </div>
+          <div class="form-group">
+            <label>Branch * (students in this branch see the course)</label>
+            <input type="text" name="branch" required placeholder="e.g. AC or ITISS" list="branchList"/>
+            <datalist id="branchList">
+              <option th:each="b : ${branches}" th:value="${b.code}" th:text="${b.code + ' — ' + b.name}"></option>
+            </datalist>
+            <div class="hint">Type any branch code. No separate Branches menu — branch is stored on the course.</div>
+          </div>
+          <div class="form-group">
+            <label>Instructor name (manual)</label>
+            <input type="text" name="instructorName" placeholder="e.g. Rahul Sen"/>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea name="description"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+              <option value="Published">Published</option>
+              <option value="Draft">Draft</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Cover image (card thumbnail)</label>
+            <input type="file" name="coverFile" accept="image/*"/>
+          </div>
+          <div class="form-group"><label>Videos</label><input type="file" name="videos" multiple accept="video/*"/></div>
+          <div class="form-group"><label>PDFs</label><input type="file" name="pdfs" multiple accept=".pdf"/></div>
+          <div class="form-group"><label>Notes</label><input type="file" name="notes" multiple/></div>
+          <button type="submit" class="btn btn-primary">Create Course</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

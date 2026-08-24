@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin Sign up · Ledger LMS</title>
+  <link rel="stylesheet" th:href="@{/css/auth.css}"/>
+</head>
+<body class="auth-page">
+  <div class="auth-card">
+    <div class="auth-card-left">
+      <h1>WELCOME</h1>
+      <h2>Admin Console</h2>
+      <p>Register as an administrator to manage the learning platform.</p>
+    </div>
+    <div class="auth-card-right">
+      <h2>Sign up</h2>
+      <p class="sub">Administrator registration</p>
+      <div th:if="${error}" class="auth-error" th:text="${error}"></div>
+      <form method="post" th:action="@{/admin/register}">
+        <div class="auth-field"><label>Full name</label><input class="auth-input" style="padding-left:14px" type="text" name="name" required/></div>
+        <div class="auth-field"><label>Email</label><input class="auth-input" style="padding-left:14px" type="email" name="email" required/></div>
+        <div class="auth-field"><label>Mobile</label><input class="auth-input" style="padding-left:14px" type="tel" name="mobile" required/></div>
+        <div class="auth-field"><label>Gender</label>
+          <select class="auth-input" style="padding-left:14px" name="gender" required>
+            <option>Male</option><option>Female</option><option>Other</option>
+          </select>
+        </div>
+        <div class="auth-field"><label>Password (6–16)</label>
+          <input class="auth-input" style="padding-left:14px" type="password" name="password" required minlength="6" maxlength="16"/>
+        </div>
+        <button type="submit" class="auth-btn">Create admin</button>
+      </form>
+      <p class="auth-links"><a th:href="@{/admin/login}">Back to sign in</a></p>
+    </div>
+  </div>
+</body>
+</html>

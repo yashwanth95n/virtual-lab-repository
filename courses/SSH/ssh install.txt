@@ -1,0 +1,7 @@
+SSH install
+
+signin root and passwd and change password 
+
+sudo service ssh start
+
+sudo service ssh status

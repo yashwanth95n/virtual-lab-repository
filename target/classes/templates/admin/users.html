@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><title>Users · Ledger LMS</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+  <div th:replace="~{fragments/layout :: admin-sidebar(${activePage})}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Users (Students)', ${admin})}"></div>
+    <div class="content">
+      <div class="toolbar" style="flex-wrap:wrap;gap:8px">
+        <a th:href="@{/admin/users}" class="btn" th:classappend="${branch == null} ? 'btn-primary' : 'btn-outline'">All branches</a>
+        <a th:each="b : ${branches}"
+           th:href="@{/admin/users(branch=${b.code})}"
+           class="btn" th:classappend="${b.code == branch} ? 'btn-primary' : 'btn-outline'"
+           th:text="${b.code}">CS</a>
+        <form th:action="@{/admin/users/delete-all-students}" method="post" style="margin-left:auto" onsubmit="return confirm('Delete ALL students?');">
+          <button type="submit" class="btn" style="background:#ef4444;color:#fff">Delete all students</button>
+        </form>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>Name</th><th>Roll No</th><th>Branch</th><th>Year</th><th>Status</th><th>Joined</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr th:each="u : ${users}">
+              <td>
+                <div class="user-cell">
+                  <span class="uname" th:text="${u.name}">Name</span>
+                  <span class="uemail" th:text="${u.email}">email</span>
+                </div>
+              </td>
+              <td th:text="${u.rollNo}">Roll</td>
+              <td th:text="${u.branch != null ? u.branch : u.department}">Branch</td>
+              <td th:text="${u.academicYear}">Year</td>
+              <td><span class="badge" th:classappend="${u.status == 'Active'} ? 'badge-active' : 'badge-suspended'" th:text="${u.status}">Active</span></td>
+              <td th:text="${u.joinedAt != null ? #temporals.format(u.joinedAt, 'MMM d') : '-'}">—</td>
+              <td>
+                <form th:if="${u.status != 'Deleted'}" th:action="@{/admin/users/{id}/delete(id=${u.id})}" method="post" onsubmit="return confirm('Delete this student?');">
+                  <button type="submit" class="btn btn-outline btn-sm" style="color:#ef4444">Delete</button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(users)}"><td colspan="7" class="text-muted">No students in this branch.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

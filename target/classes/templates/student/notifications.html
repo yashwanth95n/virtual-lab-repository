@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Notifications · Ledger LMS</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+  <div th:replace="~{fragments/layout :: student-sidebar(${activePage})}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Notifications', ${student})}"></div>
+    <div class="content">
+      <div class="table-card">
+        <table>
+          <thead><tr><th>Title</th><th>Message</th><th>Sent</th></tr></thead>
+          <tbody>
+            <tr th:each="n : ${notifications}">
+              <td th:text="${n.title}">Title</td>
+              <td th:text="${n.message}">Msg</td>
+              <td th:text="${n.sentAt != null ? #temporals.format(n.sentAt, 'MMM d') : '-'}">—</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(notifications)}">
+              <td colspan="3" class="text-muted">No notifications yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

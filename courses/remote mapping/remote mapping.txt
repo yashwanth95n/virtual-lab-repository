@@ -1,0 +1,12 @@
+sudo apt update
+sudo apt install nmap -y
+
+nmap --version
+
+hostname -I
+
+ping <ip address>
+
+nmap -p 22,3389,443 <ip address>
+
+nmap -Pn -T4 -p- <ip address>

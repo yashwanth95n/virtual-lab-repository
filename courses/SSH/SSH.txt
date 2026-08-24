@@ -1,0 +1,16 @@
+apt update
+apt install openssh-server -y
+mkdir -p /run/sshd
+/usr/sbin/sshd
+
+ss -tlnp | grep :22
+
+sudo ufw allow ssh
+
+sudo systemctl enable ssh
+
+sudo systemctl start ssh
+
+sudo systemctl status ssh
+
+ssh root@172.17.0.1

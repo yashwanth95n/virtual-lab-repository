@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title th:text="${exam.title}">Exam</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    body.exam-mode{margin:0;background:var(--paper,#f4f6f8);color:var(--text,#16233a);font-family:var(--font-body,"Inter",system-ui,sans-serif)}
+    .gate{position:fixed;inset:0;background:var(--paper,#f4f6f8);display:flex;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:16px;padding:24px;text-align:center}
+    .gate.hidden{display:none}
+    .gate h2{font-size:1.5rem;font-weight:700}
+    .gate p{color:var(--muted,#5b6b84);max-width:440px}
+    #gateStatus{font-weight:600}
+    .exam-shell{display:none;height:100vh}
+    .exam-shell.on{display:flex;flex-direction:column}
+    .exam-bar{background:var(--surface,#fff);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border,#dde3ea);box-shadow:var(--shadow-xs,0 1px 2px rgba(11,42,74,.06))}
+    .exam-bar strong{font-size:1.05rem}
+    #timer{display:inline-block;background:var(--primary-soft,#e5eef7);color:var(--primary,#14538f);font-weight:700;font-variant-numeric:tabular-nums;padding:4px 12px;border-radius:999px;font-size:.95rem}
+    #tabs{font-weight:700}
+    .exam-main{display:flex;flex:1;overflow:hidden}
+    .q-nav{width:392px;flex-shrink:0;background:var(--surface,#fff);overflow:auto;padding:18px;border-right:1px solid var(--border,#dde3ea)}
+    .q-nav-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted,#5b6b84);margin-bottom:10px}
+    .q-nav-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:7px}
+    .q-nav-grid button{aspect-ratio:1;display:flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--border-strong,#c4ccd7);border-radius:6px;background:var(--surface-sunken,#eef2f6);color:var(--text-soft,#33445e);cursor:pointer;font-size:.78rem;font-weight:600;transition:background .15s,border-color .15s,color .15s}
+    .q-nav-grid button:hover{border-color:var(--primary,#14538f)}
+    .q-nav-grid button.answered{background:var(--accent,#16824f);border-color:var(--accent,#16824f);color:#fff}
+    .q-nav-grid button.active{outline:2px solid var(--primary,#14538f);outline-offset:2px}
+    .q-nav-legend{display:flex;flex-direction:column;gap:8px;margin-top:18px;font-size:.8rem;color:var(--muted,#5b6b84)}
+    .q-nav-legend span{display:inline-flex;align-items:center;gap:8px}
+    .q-nav-legend i{width:14px;height:14px;border-radius:4px;border:1px solid var(--border-strong,#c4ccd7);background:var(--surface-sunken,#eef2f6);display:inline-block}
+    .q-nav-legend i.answered{background:var(--accent,#16824f);border-color:var(--accent,#16824f)}
+    .q-nav-legend i.current{background:var(--surface-sunken,#eef2f6);outline:2px solid var(--primary,#14538f);outline-offset:1px}
+    .q-area{flex:1;padding:28px;overflow:auto}
+    .qbox{display:none;background:var(--surface,#fff);border:1px solid var(--border,#dde3ea);border-radius:12px;padding:26px;max-width:720px;box-shadow:var(--shadow-xs,0 1px 2px rgba(11,42,74,.06))}
+    .qbox.active{display:block}
+    .qbox h3{font-size:1.05rem;color:var(--primary,#14538f)}
+    .opts label{display:block;margin:12px 0;padding:13px 14px;background:var(--surface,#fff);border:1px solid var(--border,#dde3ea);border-radius:8px;cursor:pointer;transition:border-color .15s,background .15s}
+    .opts label:hover{border-color:var(--primary,#14538f)}
+    .opts label:has(input:checked){border-color:var(--primary,#14538f);background:var(--primary-soft,#e5eef7)}
+    .nav-btns{margin-top:20px;display:flex;gap:12px}
+    #cam{position:fixed;bottom:12px;right:12px;width:140px;height:105px;border-radius:10px;border:2px solid var(--primary,#14538f);object-fit:cover;background:#000;z-index:20;box-shadow:var(--shadow-md,0 8px 20px -6px rgba(11,42,74,.16))}
+    .warn {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.warn-box {
+    width: min(450px, 90%);
+    background: var(--surface, #fff);
+    border-radius: 14px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+}
+
+.warn-box h2 {
+    color: var(--danger, #b3261e);
+    margin-bottom: 12px;
+}
+
+.warn-box p {
+    color: var(--text-soft, #33445e);
+    margin-bottom: 20px;
+}
+
+#warningCountdown {
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--danger, #b3261e);
+}
+    .btn-p{background:var(--primary,#14538f);color:#fff;border:1px solid var(--primary,#14538f);padding:12px 22px;border-radius:8px;font-weight:600;cursor:pointer;transition:background .15s}
+    .btn-p:hover{background:var(--primary-dark,#0d3c6b)}
+    .btn-p:active{transform:translateY(1px)}
+    .btn-o{background:var(--surface,#fff);color:var(--text-soft,#33445e);border:1px solid var(--border-strong,#c4ccd7);padding:12px 22px;border-radius:8px;cursor:pointer;transition:background .15s}
+    .btn-o:hover{background:var(--surface-sunken,#eef2f6)}
+    @media (max-width:900px){ .q-nav{width:280px} .q-nav-grid{grid-template-columns:repeat(6,1fr)} }
+  </style>
+</head>
+<body class="exam-mode">
+  <!-- Pre-exam gate: fullscreen + camera + single tab check -->
+  <div class="gate" id="gate">
+    <h2 th:text="${exam.title}">Exam</h2>
+    <p style="color:#94a3b8;max-width:420px;text-align:center">
+      Before starting: allow camera, go fullscreen, and keep only this tab open.
+      Switching tabs will auto-submit and lock the exam.
+    </p>
+    <p id="gateStatus" style="color:var(--warning,#a8621a)">Waiting for permissions…</p>
+    <button class="btn-o" id="screenBtn" type="button" onclick="requestScreenShare()">Share your screen</button>
+    <button class="btn-p" id="startBtn" disabled onclick="beginExam()">Start exam</button>
+  </div>
+
+  <div class="exam-shell" id="shell">
+    <div class="exam-bar">
+      <strong th:text="${exam.title}">Exam</strong>
+      <div>
+        <span id="timer" th:text="${exam.durationMinutes + ':00'}">60:00</span>
+        · Tabs: <span id="tabs">0</span>
+      </div>
+    </div>
+    <div class="exam-main">
+      <div class="q-nav">
+        <div class="q-nav-label">Questions</div>
+        <div class="q-nav-grid" id="qNav"></div>
+        <div class="q-nav-legend">
+          <span><i></i> Not answered</span>
+          <span><i class="answered"></i> Answered</span>
+          <span><i class="current"></i> Current question</span>
+        </div>
+      </div>
+      <div class="q-area">
+        <div id="warn" class="warn">
+    <div class="warn-box">
+        <h2 id="warningTitle">⚠️ Exam Warning</h2>
+
+        <p id="warningMessage">
+            Please return to the exam.
+        </p>
+
+        <div id="warningCountdown">10</div>
+
+        <button id="resumeShareBtn" class="btn-p" style="display:none;margin-bottom:14px" onclick="resumeScreenShare()" type="button">Resume screen sharing</button>
+
+        <p>
+            The examination will close automatically.
+        </p>
+    </div>
+</div>
+        <form method="post" th:action="@{/student/exams/{id}/submit(id=${exam.id})}" id="examForm">
+          <input type="hidden" name="attemptId" th:value="${attempt.id}"/>
+          <input type="hidden" name="tabSwitches" id="tabSwitches" value="0"/>
+          <input type="hidden" name="autoSubmitted" id="autoSubmitted" value="false"/>
+          <input type="hidden" name="autoReason" id="autoReason" value=""/>
+          <input type="hidden" name="cameraData" id="cameraData"/>
+          <div th:each="q,st : ${questions}" class="qbox" th:id="'qb-' + ${st.index}" th:attr="data-idx=${st.index}">
+            <h3 th:text="'Question ' + ${st.count}">Q</h3>
+            <p th:text="${q.questionText}" style="margin:12px 0;font-size:1.05rem">Text</p>
+            <div class="opts">
+              <label><input type="radio" th:name="'q_' + ${q.id}" value="A" onchange="markAnswered(this)"/> A. <span th:text="${q.optionA}"></span></label>
+              <label><input type="radio" th:name="'q_' + ${q.id}" value="B" onchange="markAnswered(this)"/> B. <span th:text="${q.optionB}"></span></label>
+              <label><input type="radio" th:name="'q_' + ${q.id}" value="C" onchange="markAnswered(this)"/> C. <span th:text="${q.optionC}"></span></label>
+              <label><input type="radio" th:name="'q_' + ${q.id}" value="D" onchange="markAnswered(this)"/> D. <span th:text="${q.optionD}"></span></label>
+            </div>
+          </div>
+          <div class="nav-btns">
+            <button type="button" class="btn-o" onclick="prevQ()">Previous</button>
+            <button type="button" class="btn-o" onclick="nextQ()">Next</button>
+            <button type="submit" class="btn-p">Submit exam</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <video id="cam" autoplay muted playsinline></video>
+
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    const durationMin = /*[[${exam.durationMinutes}]]*/ 60;
+    const totalQ = /*[[${questions.size()}]]*/ 0;
+    let cur = 0;
+    let tabs = 0;
+    let remaining = durationMin * 60;
+    let started = false;
+
+    let violationActive = false;
+    let violationTimer = null;
+    let currentViolation = null;
+
+    let initialWidth = 0;
+    let initialHeight = 0;
+
+    // Build nav
+    const nav = document.getElementById('qNav');
+    for (let i = 0; i < totalQ; i++) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = String(i + 1);
+      b.title = 'Question ' + (i + 1);
+      b.id = 'nav-' + i;
+      b.onclick = () => showQ(i);
+      nav.appendChild(b);
+    }
+
+    function showQ(i) {
+      document.querySelectorAll('.qbox').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.q-nav button').forEach(el => el.classList.remove('active'));
+      const box = document.getElementById('qb-' + i);
+      if (box) box.classList.add('active');
+      const nb = document.getElementById('nav-' + i);
+      if (nb) nb.classList.add('active');
+      cur = i;
+    }
+    function nextQ() { if (cur < totalQ - 1) showQ(cur + 1); }
+    function prevQ() { if (cur > 0) showQ(cur - 1); }
+    function markAnswered(inp) {
+      const box = inp.closest('.qbox');
+      if (!box) return;
+      const idx = box.getAttribute('data-idx');
+      const nb = document.getElementById('nav-' + idx);
+      if (nb) nb.classList.add('answered');
+    }
+
+    function tick() {
+      if (!started) return;
+      remaining--;
+      const m = Math.floor(remaining / 60);
+      const s = remaining % 60;
+      document.getElementById('timer').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      if (remaining <= 0) {
+        document.getElementById('autoSubmitted').value = 'true';
+        submitWithVideo();
+      }
+    }
+    setInterval(tick, 1000);
+
+    document.addEventListener("visibilitychange", () => {
+
+        if (!started) {
+            return;
+        }
+
+        if (document.hidden) {
+
+            // Already showing a warning for something else - don't stack a new one
+            if (violationActive) {
+                return;
+            }
+
+            tabs++;
+
+            document.getElementById("tabs").textContent = tabs;
+
+            document.getElementById("tabSwitches").value = tabs;
+
+            handleViolation("TAB_SWITCH");
+
+        } else {
+
+            // Tab is visible again - clear the warning if that's what we were waiting on
+            if (violationActive && currentViolation === "TAB_SWITCH") {
+                resolveViolation();
+            }
+        }
+    });
+    
+    // The Fullscreen API (document.fullscreenElement / fullscreenchange) only
+    // covers fullscreen entered via requestFullscreen(). Pressing F11 toggles
+    // the browser's own native fullscreen and does NOT fire fullscreenchange
+    // or update document.fullscreenElement in most browsers - so relying on
+    // the event alone misses "F11 back to windowed". Comparing the viewport
+    // to the actual screen size catches it regardless of how fullscreen was
+    // entered or exited.
+    function isTrulyFullscreen() {
+        if (document.fullscreenElement) return true;
+        const tolerance = 4; // rounding / scrollbar slack
+        return window.innerWidth >= (screen.width - tolerance) &&
+               window.innerHeight >= (screen.height - tolerance);
+    }
+
+    function checkFullscreenState() {
+
+        if (!started) return;
+
+        if (!isTrulyFullscreen()) {
+
+            if (violationActive) return;
+
+            handleViolation("FULLSCREEN_EXIT");
+
+        } else {
+
+            if (violationActive && currentViolation === "FULLSCREEN_EXIT") {
+                resolveViolation();
+            }
+        }
+    }
+
+    document.addEventListener("fullscreenchange", checkFullscreenState);
+
+    // Poll as a fallback net, since F11 changes give us no reliable event.
+    setInterval(checkFullscreenState, 1000);
+    
+    function handleViolation(type) {
+
+        // Don't start multiple warnings at the same time
+        if (!started || violationActive) {
+            return;
+        }
+
+        violationActive = true;
+        currentViolation = type;
+
+        const warn = document.getElementById("warn");
+        const title = document.getElementById("warningTitle");
+        const message = document.getElementById("warningMessage");
+        const countdown = document.getElementById("warningCountdown");
+
+        // Decide warning message
+        if (type === "FULLSCREEN_EXIT") {
+
+            title.textContent = "⚠️ Fullscreen Required";
+            message.textContent =
+                "You have exited fullscreen mode. Please return to fullscreen immediately.";
+
+        } else if (type === "TAB_SWITCH") {
+
+            title.textContent = "⚠️ Tab Switching Detected";
+            message.textContent =
+                "You switched away from the examination. Return to the exam immediately.";
+
+        } else if (type === "CAMERA_OFF") {
+
+            title.textContent = "⚠️ Camera Unavailable";
+            message.textContent =
+                "Your camera is turned off or unavailable. Please enable your camera.";
+
+        } else if (type === "CAMERA_COVERED") {
+
+            title.textContent = "⚠️ Camera Blocked";
+            message.textContent =
+                "Your camera appears to be covered or blocked. Please uncover your camera.";
+
+        } else if (type === "SCREEN_SHARE_STOPPED") {
+
+            title.textContent = "⚠️ Screen Sharing Stopped";
+            message.textContent =
+                "You stopped sharing your screen. Click below to resume sharing immediately.";
+        }
+
+        // Only the screen-share violation has a way to recover with a click -
+        // the others resolve themselves once the underlying condition clears.
+        const resumeBtn = document.getElementById("resumeShareBtn");
+        if (resumeBtn) resumeBtn.style.display = (type === "SCREEN_SHARE_STOPPED") ? "inline-block" : "none";
+
+        warn.style.display = "flex";
+
+        let seconds = 10;
+        countdown.textContent = seconds;
+
+        violationTimer = setInterval(() => {
+
+            seconds--;
+
+            countdown.textContent = seconds;
+
+            if (seconds <= 0) {
+
+                clearInterval(violationTimer);
+                violationTimer = null;
+
+                forceCloseExam(currentViolation);
+            }
+
+        }, 1000);
+    }
+
+    // Called whenever the flagged condition clears (fullscreen re-entered,
+    // tab back in view, camera uncovered/reconnected) BEFORE the 10s runs out.
+    // This hides the popup and lets the exam continue normally.
+    function resolveViolation() {
+
+        if (violationTimer) {
+            clearInterval(violationTimer);
+            violationTimer = null;
+        }
+
+        violationActive = false;
+        currentViolation = null;
+
+        const warn = document.getElementById("warn");
+        if (warn) warn.style.display = "none";
+
+        // reset camera-black counter so a resolved CAMERA_COVERED
+        // doesn't immediately re-trigger on the next check tick
+        blackSeconds = 0;
+    }
+    
+    function forceCloseExam(reason) {
+
+        if (!started) {
+            return;
+        }
+
+        started = false;
+
+        document.getElementById("autoSubmitted").value = "true";
+
+        document.getElementById("autoReason").value = reason;
+
+        // Keep tab count updated
+        document.getElementById("tabSwitches").value = tabs;
+
+        /*
+         * Submit the current attempt to the server.
+         *
+         * Backend should decide:
+         *
+         * FULLSCREEN_EXIT      -> no retake
+         * TAB_SWITCH           -> no retake
+         * CAMERA_OFF           -> retake allowed
+         * CAMERA_COVERED       -> retake allowed
+         * SCREEN_SHARE_STOPPED -> no retake (user declined to resume sharing in time)
+         */
+        submitWithVideo();
+    }
+
+    let camOk = false;
+    let screenOk = false;
+    let screenStream = null;
+    const status = document.getElementById('gateStatus');
+    const startBtn = document.getElementById('startBtn');
+
+    function updateGate() {
+      if (camOk && screenOk) {
+        status.textContent = 'Ready. Click Start exam.';
+        status.style.color = 'var(--accent, #16824f)';
+        startBtn.disabled = false;
+      } else if (camOk && !screenOk) {
+        status.textContent = 'Camera ready. Now click "Share your screen" (choose Entire Screen).';
+      }
+    }
+
+    navigator.mediaDevices?.getUserMedia({ video: true, audio: false })
+      .then(stream => {
+        document.getElementById('cam').srcObject = stream;
+        camOk = true;
+        updateGate();
+      }).catch(() => {
+        status.textContent = 'Camera required. Allow camera and reload.';
+      });
+
+    // getDisplayMedia needs a real click (user gesture), so this is wired to
+    // the "Share your screen" button rather than firing automatically.
+    async function requestScreenShare() {
+      try {
+        screenStream = await navigator.mediaDevices.getDisplayMedia({
+          video: { displaySurface: 'monitor' },
+          audio: false
+        });
+        screenOk = true;
+        const btn = document.getElementById('screenBtn');
+        btn.textContent = 'Screen shared ✓';
+        btn.disabled = true;
+        screenStream.getVideoTracks()[0].addEventListener('ended', onScreenShareEnded);
+        updateGate();
+      } catch (e) {
+        status.textContent = 'Screen sharing is required. Click "Share your screen" and choose Entire Screen.';
+      }
+    }
+
+    function onScreenShareEnded() {
+      if (!started) return;
+      handleViolation("SCREEN_SHARE_STOPPED");
+    }
+
+    // Called from the "Resume screen sharing" button in the warning popup.
+    // This is itself a click, so the browser allows re-prompting here.
+    async function resumeScreenShare() {
+      try {
+        const newStream = await navigator.mediaDevices.getDisplayMedia({
+          video: { displaySurface: 'monitor' },
+          audio: false
+        });
+        screenStream = newStream;
+        screenStream.getVideoTracks()[0].addEventListener('ended', onScreenShareEnded);
+        if (window.MediaRecorder) {
+          screenRecorder = new MediaRecorder(screenStream, { mimeType: 'video/webm' });
+          screenRecorder.ondataavailable = e => { if (e.data.size > 0) screenChunks.push(e.data); };
+          screenRecorder.start(1000);
+        }
+        resolveViolation();
+      } catch (e) {
+        // user cancelled the re-share prompt - warning keeps counting down
+      }
+    }
+    
+    // Any viewport change (Windows Snap, split screen, restoring the window,
+    // exiting F11, etc.) - just re-run the same true-fullscreen check.
+    window.addEventListener("resize", checkFullscreenState);
+
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let screenRecorder = null;
+    let screenChunks = [];
+
+    function beginExam() {
+
+        document.documentElement.requestFullscreen?.().catch(() => {});
+
+        document.getElementById('gate').classList.add('hidden');
+
+        document.getElementById('shell').classList.add('on');
+
+        started = true;
+
+        // Remember the exam viewport
+        initialWidth = window.innerWidth;
+        initialHeight = window.innerHeight;
+
+        showQ(0);
+      // start recording camera stream
+      try {
+        const stream = document.getElementById('cam').srcObject;
+        if (stream && window.MediaRecorder) {
+          recordedChunks = [];
+          mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+          mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+          mediaRecorder.start(1000);
+        }
+      } catch (e) {}
+      try {
+        if (screenStream && window.MediaRecorder) {
+          screenChunks = [];
+          screenRecorder = new MediaRecorder(screenStream, { mimeType: 'video/webm' });
+          screenRecorder.ondataavailable = e => { if (e.data.size > 0) screenChunks.push(e.data); };
+          screenRecorder.start(1000);
+        }
+      } catch (e) {}
+      setTimeout(() => {
+        try {
+          const v = document.getElementById('cam');
+          const c = document.createElement('canvas');
+          c.width = 160; c.height = 120;
+          c.getContext('2d').drawImage(v, 0, 0, 160, 120);
+          document.getElementById('cameraData').value = c.toDataURL('image/jpeg', 0.5);
+        } catch (e) {}
+      }, 1500);
+    }
+    
+    document.getElementById('examForm').addEventListener('submit', function(ev) {
+      if (this.dataset.ready === '1') return;
+      ev.preventDefault();
+      submitWithVideo();
+    });
+
+    function submitWithVideo() {
+      const form = document.getElementById('examForm');
+      let pending = 0;
+
+      const attachFile = (name, chunks, filename) => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const dt = new DataTransfer();
+        dt.items.add(new File([blob], filename, { type: 'video/webm' }));
+        let input = form.querySelector('input[name=' + name + ']');
+        if (!input) {
+          input = document.createElement('input');
+          input.type = 'file';
+          input.name = name;
+          input.style.display = 'none';
+          form.appendChild(input);
+        }
+        input.files = dt.files;
+      };
+
+      const tryFinish = () => {
+        if (pending > 0) return;
+        form.dataset.ready = '1';
+        form.submit();
+      };
+
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        pending++;
+        mediaRecorder.onstop = () => {
+          attachFile('videoFile', recordedChunks, 'exam-recording.webm');
+          pending--;
+          tryFinish();
+        };
+        mediaRecorder.stop();
+      }
+
+      if (screenRecorder && screenRecorder.state !== 'inactive') {
+        pending++;
+        screenRecorder.onstop = () => {
+          attachFile('screenFile', screenChunks, 'screen-recording.webm');
+          pending--;
+          tryFinish();
+        };
+        screenRecorder.stop();
+      }
+
+      tryFinish();
+    }
+    
+    // Camera black / closed detection (3 seconds continuous)
+    let blackSeconds = 0;
+    const BLACK_LIMIT = 3;
+    function checkCameraBlack() {
+      if (!started) return;
+
+      let cameraMissing = false;
+      let cameraBlack = false;
+
+      try {
+        const v = document.getElementById('cam');
+        if (!v || !v.srcObject || v.readyState < 2) {
+          cameraMissing = true;
+        } else {
+          const c = document.createElement('canvas');
+          c.width = 40; c.height = 30;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(v, 0, 0, 40, 30);
+          const data = ctx.getImageData(0, 0, 40, 30).data;
+          let sum = 0;
+          for (let i = 0; i < data.length; i += 4) {
+            sum += (data[i] + data[i+1] + data[i+2]) / 3;
+          }
+          const avg = sum / (data.length / 4);
+          if (avg < 18) cameraBlack = true;
+        }
+      } catch (e) { cameraMissing = true; }
+
+      if (cameraMissing || cameraBlack) {
+        blackSeconds++;
+      } else {
+        blackSeconds = 0;
+
+        // Camera is back and visible - clear the warning if it was raised
+        // for a camera reason.
+        if (violationActive && (currentViolation === "CAMERA_COVERED" || currentViolation === "CAMERA_OFF")) {
+          resolveViolation();
+        }
+      }
+
+      if (blackSeconds >= BLACK_LIMIT) {
+
+    	    if (!violationActive) {
+
+    	        handleViolation(cameraMissing ? "CAMERA_OFF" : "CAMERA_COVERED");
+
+    	    }
+    	}
+    }
+    setInterval(checkCameraBlack, 1000);
+
+    /*]]>*/
+  </script>
+</body>
+</html>

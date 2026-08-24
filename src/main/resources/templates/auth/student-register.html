@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Sign up · Ledger LMS</title>
+  <link rel="stylesheet" th:href="@{/css/auth.css}"/>
+</head>
+<body class="auth-page">
+  <div class="auth-card" style="max-width:960px">
+    <div class="auth-card-left">
+      <h1>WELCOME</h1>
+      <h2>Virtual Lab Repository</h2>
+      <p>Create your student account to enroll in courses, take quizzes and track progress.</p>
+    </div>
+    <div class="auth-card-right" style="padding:36px 40px;overflow-y:auto;max-height:90vh">
+      <h2>Sign up</h2>
+      <p class="sub">Student registration — Create your account and sign in</p>
+      <div th:if="${error}" class="auth-error" th:text="${error}"></div>
+      <form method="post" th:action="@{/student/register}" id="regForm" novalidate>
+        <div class="auth-field">
+          <label>Full name</label>
+          <input class="auth-input" style="padding-left:14px" type="text" name="name" required/>
+        </div>
+        <div class="auth-field">
+          <label>Roll no</label>
+          <input class="auth-input" style="padding-left:14px" type="text" name="rollNo" required
+                 autocomplete="off" placeholder="Enter your roll number"/>
+        </div>
+        <div class="auth-field">
+          <label>Email</label>
+          <input class="auth-input" style="padding-left:14px" type="email" name="email" required/>
+        </div>
+        <div class="auth-field">
+          <label>Gender</label>
+          <select class="auth-input" style="padding-left:14px" name="gender" required>
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="auth-field">
+          <label>Mobile (10 digits)</label>
+          <input class="auth-input" style="padding-left:14px" type="text" name="mobile" id="mobile"
+                 required inputmode="numeric" maxlength="10" placeholder="10 digit mobile"/>
+        </div>
+        <div class="auth-field">
+          <label>Branch</label>
+          <select class="auth-input" style="padding-left:14px" name="branch" required>
+            <option value="">Select branch</option>
+            <option th:each="b : ${branches}" th:value="${b.code}" th:text="${b.code + ' — ' + b.name}">CS</option>
+          </select>
+        </div>
+        <div class="auth-field">
+          <label>Password (6–16 chars)</label>
+          <input class="auth-input" style="padding-left:14px" type="password" name="password" required minlength="6" maxlength="16"/>
+        </div>
+        <button type="submit" class="auth-btn">Create account</button>
+      </form>
+      <p class="auth-links">Already registered? <a th:href="@{/login}">Sign in</a></p>
+    </div>
+  </div>
+  <script>
+    document.getElementById('regForm').addEventListener('submit', function (e) {
+      var mobile = (document.getElementById('mobile').value || '').trim();
+      if (!/^\d{10}$/.test(mobile)) {
+        e.preventDefault();
+        alert('Mobile must be exactly 10 digits.');
+        return false;
+      }
+    });
+  </script>
+</body>
+</html>

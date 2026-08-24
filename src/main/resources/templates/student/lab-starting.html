@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Starting lab…</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f172a;color:#fff;font-family:system-ui,sans-serif}
+    .box{text-align:center;max-width:420px;padding:32px}
+    .spin{width:48px;height:48px;border:4px solid #334155;border-top-color:#38bdf8;border-radius:50%;margin:0 auto 20px;animation:s 1s linear infinite}
+    @keyframes s{to{transform:rotate(360deg)}}
+    a{color:#38bdf8}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="spin"></div>
+    <h2>Starting Docker lab…</h2>
+    <p style="opacity:.8;margin:12px 0">First launch can take 1–3 minutes while the image downloads and the desktop boots.</p>
+    <p style="opacity:.8">This page will open the lab automatically.</p>
+    <p style="margin-top:20px">
+      <a th:if="${novncUrl}" th:href="${novncUrl}" id="openLink" target="_blank">Open lab now</a>
+    </p>
+  </div>
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    var url = /*[[${novncUrl}]]*/ '';
+    if (url) {
+      // Try open after short delay, and poll readiness
+      var tries = 0;
+      function tryOpen() {
+        tries++;
+        fetch(url, {mode: 'no-cors'}).then(function() {
+          window.location.href = url;
+        }).catch(function() {
+          if (tries < 45) setTimeout(tryOpen, 2000);
+          else window.location.href = url; // try anyway
+        });
+      }
+      setTimeout(tryOpen, 3000);
+    }
+    /*]]>*/
+  </script>
+</body>
+</html>

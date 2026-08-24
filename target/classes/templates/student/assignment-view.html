@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Assignment · Ledger LMS</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+  <div th:replace="~{fragments/layout :: student-sidebar(${activePage})}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Assignment', ${student})}"></div>
+    <div class="content">
+      <div class="form-card">
+        <div th:if="${assignment.dailyTask}" style="background:#fef3c7;padding:12px;border-radius:10px;margin-bottom:12px">
+          <strong>Daily task</strong> — complete <span th:text="${assignment.dailyCount}">3</span> questions today.
+          <p th:text="${assignment.taskInstructions}" style="margin-top:6px"></p>
+          <a th:if="${assignment.sourceFilePath}" th:href="${assignment.sourceFilePath}" target="_blank" class="btn btn-outline btn-sm">Open question PDF</a>
+        </div>
+        <h3 th:text="${assignment.title}">Title</h3>
+        <p class="text-muted" th:text="${assignment.courseTitle}">Course</p>
+        <p th:if="${assignment.description}" th:text="${assignment.description}">Description</p>
+        <p th:if="${assignment.filePath}"><a th:href="${assignment.filePath}" target="_blank">Download questions</a></p>
+        <hr class="mt-2 mb-2"/>
+        <form method="post" th:action="@{/student/assessments/assignment/{id}/submit(id=${assignment.id})}" enctype="multipart/form-data">
+          <div class="form-group">
+            <label>Upload your answer</label>
+            <input type="file" name="answerFile" required/>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit answer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

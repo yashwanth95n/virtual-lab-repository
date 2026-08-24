@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title>Exam locked</title><link rel="stylesheet" th:href="@{/css/style.css}"/></head>
+<body>
+<div th:replace="~{fragments/layout :: student-sidebar(${activePage})}"></div>
+<div class="main">
+  <div th:replace="~{fragments/layout :: topbar('Exam locked', ${student})}"></div>
+  <div class="content">
+    <div class="form-card" style="text-align:center">
+      <h2 th:text="${exam.title}">Exam</h2>
+      <p>This exam is locked - either you've used all your attempts, or your last attempt was auto-submitted after a proctoring violation (fullscreen exit, tab switch, camera, or screen share).</p>
+      <p class="text-muted">Ask your admin to allow a retake for this exam.</p>
+      <a th:href="@{/student/exams}" class="btn btn-primary">Back</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

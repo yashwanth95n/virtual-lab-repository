@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Profile · Ledger LMS</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+  <div th:replace="~{fragments/layout :: student-sidebar(${activePage})}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Profile', ${student})}"></div>
+    <div class="content">
+      <div class="form-card">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" th:value="${student.name}" disabled/>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" th:value="${student.email}" disabled/>
+        </div>
+        <div class="form-group">
+          <label>Department</label>
+          <input type="text" th:value="${student.department}" disabled/>
+        </div>
+        <div class="form-group">
+          <label>Roll No.</label>
+          <input type="text" th:value="${student.rollNo}" disabled/>
+        </div>
+        <p class="text-muted text-sm">Contact admin to update profile details.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

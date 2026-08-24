@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><title>Quiz locked</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+  <div th:replace="~{fragments/layout :: student-sidebar(${activePage})}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Quiz locked', ${student})}"></div>
+    <div class="content">
+      <div class="form-card" style="text-align:center;">
+        <h2 th:text="${quiz.title}">Quiz</h2>
+        <p class="mt-2">You have used <strong th:text="${used}">2</strong> of <strong th:text="${max}">2</strong> attempts.</p>
+        <p class="text-muted">This quiz is locked. Ask your admin to grant extra attempts.</p>
+        <a th:href="@{/student/assessments}" class="btn btn-primary mt-3">Back to Assessments</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

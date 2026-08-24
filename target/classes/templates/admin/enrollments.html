@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Enrollments · Ledger LMS</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body>
+  <div th:replace="~{fragments/layout :: admin-sidebar(${activePage})}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Enrollments', ${admin})}"></div>
+    <div class="content">
+      <div class="toolbar" style="flex-wrap:wrap;gap:8px">
+        <a th:href="@{/admin/enrollments}" class="btn" th:classappend="${branch == null} ? 'btn-primary' : 'btn-outline'">All</a>
+        <a th:each="b : ${branches}" th:href="@{/admin/enrollments(branch=${b.code})}"
+           class="btn" th:classappend="${b.code == branch} ? 'btn-primary' : 'btn-outline'" th:text="${b.code}">CS</a>
+      </div>
+      <div class="table-card">
+        <table class="table table-hover table-bordered">
+          <thead class="table-light">
+            <tr><th>Student</th><th>Course</th><th>Status</th><th>Progress</th><th>Enrolled</th></tr>
+          </thead>
+          <tbody>
+            <tr th:each="e : ${enrollments}">
+              <td th:text="${e.studentName}">Student</td>
+              <td th:text="${e.courseTitle}">Course</td>
+              <td><span class="badge badge-active" th:text="${e.status}">Active</span></td>
+              <td th:text="${e.progress + '%'}">0%</td>
+              <td th:text="${e.enrolledAt != null ? #temporals.format(e.enrolledAt, 'MMM d') : '-'}">—</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(enrollments)}">
+              <td colspan="5" class="text-muted">No enrollments yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title th:text="${vm.name}">Lab Desktop</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    html,body{height:100%;margin:0}
+    .desk-wrap{display:flex;flex-direction:column;height:100vh}
+    .desk-bar{background:#0f172a;color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px}
+    .desk-bar a{color:#93c5fd;text-decoration:none;font-weight:600}
+    .desk-frame{flex:1;border:0;width:100%;background:#000}
+  </style>
+</head>
+<body>
+  <div class="desk-wrap">
+    <div class="desk-bar">
+      <strong th:text="${vm.name}">Lab</strong>
+      <span th:text="${vm.osType}" style="opacity:.7;font-size:.9rem">Ubuntu</span>
+      <span th:if="${vm.osType != null and #strings.containsIgnoreCase(vm.osType,'Kali')}"
+            style="background:#334155;padding:2px 8px;border-radius:6px;font-size:.8rem">
+        Login: <strong>kasm_user</strong> / <strong>password</strong> — accept HTTPS warning if shown
+      </span>
+      <span style="flex:1"></span>
+      <a th:href="@{/admin/lab}">← Back to Lab VM</a>
+      <a th:if="${novncUrl}" th:href="${novncUrl}" target="_blank">Open in new tab</a>
+    </div>
+    <iframe th:if="${novncUrl}" class="desk-frame" th:src="${novncUrl}"
+            allow="clipboard-read; clipboard-write; fullscreen"
+            allowfullscreen></iframe>
+    <div th:unless="${novncUrl}" style="padding:40px;text-align:center">
+      Desktop not running. <a th:href="@{/admin/lab}">Go back and Launch</a>
+    </div>
+  </div>
+</body>
+</html>

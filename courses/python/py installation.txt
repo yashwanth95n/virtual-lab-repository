@@ -1,0 +1,1 @@
+pip3 install pyotp "qrcode[pil]" --break-system-packages

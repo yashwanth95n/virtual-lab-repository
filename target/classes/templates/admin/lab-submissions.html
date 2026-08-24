@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title>Lab Submissions</title><link rel="stylesheet" th:href="@{/css/style.css}"/></head>
+<body>
+<div th:replace="~{fragments/layout :: admin-sidebar(${activePage})}"></div>
+<div class="main">
+  <div th:replace="~{fragments/layout :: topbar('Lab Submissions', ${admin})}"></div>
+  <div class="content">
+    <div class="toolbar" style="flex-wrap:wrap;gap:8px">
+      <a th:href="@{/admin/labs/submissions}" class="btn" th:classappend="${branch == null} ? 'btn-primary' : 'btn-outline'">All</a>
+      <a th:each="b : ${branches}" th:href="@{/admin/labs/submissions(branch=${b.code})}"
+         class="btn" th:classappend="${b.code == branch} ? 'btn-primary' : 'btn-outline'" th:text="${b.code}">CS</a>
+    </div>
+    <div class="table-card">
+      <table>
+        <thead><tr><th>Student</th><th>Branch</th><th>Lab</th><th>Submitted</th><th>File</th></tr></thead>
+        <tbody>
+          <tr th:each="s : ${submissions}">
+            <td th:text="${s.studentName}">S</td>
+            <td th:text="${s.branch}">CS</td>
+            <td th:text="${s.labTitle}">Lab</td>
+            <td th:text="${s.submittedAt != null ? #temporals.format(s.submittedAt,'MMM d HH:mm') : '-'}">—</td>
+            <td><a th:if="${s.filePath}" th:href="${s.filePath}" target="_blank" class="btn btn-outline btn-sm">Open</a></td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(submissions)}"><td colspan="5" class="text-muted">No lab submissions.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>

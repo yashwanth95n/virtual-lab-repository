@@ -1,0 +1,28 @@
+INTRODUCTION DATA, EXPRESSIONS, STATEMENTS
+Introduction to Python and installation, data types: Int, float, Boolean, string, and list;
+variables, expressions, statements, precedence of operators, comments; modules, functions--
+- function and its use, flow of execution, parameters and arguments.
+Introduction to Python and installation:
+Python is a widely used general-purpose, high level programming language. It was initially
+designed by Guido van Rossum in 1991 and developed by Python Software Foundation. It
+was mainly developed for emphasis on code readability, and its syntax allows programmers
+to express concepts in fewer lines of code.
+Python is a programming language that lets you work quickly and integrate systems more
+efficiently.
+There are two major Python versions- Python 2 and Python 3.
+• On 16 October 2000, Python 2.0 was released with many new features.
+• On 3rd December 2008, Python 3.0 was released with more testing and includes new
+features.
+Beginning with Python programming:
+1) Finding an Interpreter:
+Before we start Python programming, we need to have an interpreter to interpret and run our
+programs. There are certain online interpreters like https://ide.geeksforgeeks.org/,
+http://ideone.com/ or http://codepad.org/ that can be used to start Python without installing
+an interpreter.
+Windows: There are many interpreters available freely to run Python scripts like IDLE
+(Integrated Development Environment) which is installed when you install the python
+software from http://python.org/downloads/
+2) Writing first program:
+# Script Begins
+Statement1
+PYTHON PROGRAMMIN

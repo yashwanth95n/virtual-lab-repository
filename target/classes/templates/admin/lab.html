@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Lab VM · Docker</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body>
+<div th:replace="~{fragments/layout :: admin-sidebar(${activePage})}"></div>
+<div class="main">
+  <div th:replace="~{fragments/layout :: topbar('Lab VM (Docker GUI)', ${admin})}"></div>
+  <div class="content">
+
+    <div th:if="${param.error}" class="mb-2" style="background:#fef2f2;color:#b91c1c;padding:10px 14px;border-radius:10px">
+      Docker launch failed. Ensure Docker Desktop is running. First image pull can take a few minutes.
+    </div>
+
+    <div class="form-card" style="max-width:720px;margin-bottom:20px">
+      <h3 style="margin-bottom:12px">Create lab (Docker desktop)</h3>
+      <p class="hint mb-2">
+        <strong>Ubuntu</strong> uses image <code>lscr.io/linuxserver/webtop:ubuntu-xfce</code> (Ubuntu desktop).<br/>
+        <strong>Kali</strong> uses image <code>kasmweb/kali-rolling-desktop:1.18.0</code> (real Kali XFCE + tools).<br/>
+        If you leave branch and student empty, a lab is created for <strong>every registered student</strong>.
+      </p>
+      <form method="post" th:action="@{/admin/lab/create}">
+        <div class="form-group">
+          <label>Lab name *</label>
+          <input type="text" name="name" required placeholder="Practice Lab 1"/>
+        </div>
+        <div class="form-group">
+          <label>Machine type *</label>
+          <select name="osType" required>
+            <option value="Ubuntu">Ubuntu XFCE (linuxserver/webtop — Ubuntu look)</option>
+            <option value="Kali">Kali Linux XFCE (real Kali tools + desktop)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea name="description" placeholder="Optional notes"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Assign to branch (optional)</label>
+          <select name="branch">
+            <option value="">— All students if empty —</option>
+            <option th:each="b : ${branches}" th:value="${b.code}" th:text="${b.code}">CS</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Or one student (optional)</label>
+          <select name="studentId">
+            <option value="">— All students if empty —</option>
+            <option th:each="s : ${students}" th:value="${s.id}"
+                    th:text="${s.name + ' (' + (s.rollNo != null ? s.rollNo : s.email) + ')'}">Student</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Create lab</button>
+      </form>
+    </div>
+
+    <div class="table-card">
+      <div class="mb-2">
+        <a class="btn btn-outline btn-sm" th:href="@{/admin/lab/activities}">View / export lab activity (PDF & Word)</a>
+      </div>
+      <h3>Lab VMs</h3>
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered">
+          <thead class="table-light">
+            <tr><th>Name</th><th>Type</th><th>Assigned</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr th:each="v : ${vms}">
+              <td th:text="${v.name}">Lab</td>
+              <td th:text="${v.osType}">Ubuntu</td>
+              <td th:text="${v.assignedStudentName != null ? v.assignedStudentName : '—'}">—</td>
+              <td><span class="badge" th:classappend="${v.status == 'Running'} ? 'badge-published' : 'badge-active'" th:text="${v.status}">Assigned</span></td>
+              <td style="white-space:nowrap">
+                <form th:if="${v.containerId == null or #strings.isEmpty(v.containerId)}"
+                      th:action="@{/admin/lab/{id}/launch(id=${v.id})}" method="post" style="display:inline">
+                  <button type="submit" class="btn btn-primary btn-sm">Launch</button>
+                </form>
+                <a th:if="${v.novncUrl != null and !#strings.isEmpty(v.novncUrl)}"
+                   th:href="@{/admin/lab/{id}/desktop(id=${v.id})}" class="btn btn-outline btn-sm">Open desktop</a>
+                <form th:if="${v.containerId != null and !#strings.isEmpty(v.containerId)}"
+                      th:action="@{/admin/lab/{id}/stop(id=${v.id})}" method="post" style="display:inline">
+                  <button type="submit" class="btn btn-outline btn-sm">Stop</button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(vms)}"><td colspan="5" class="text-muted">No labs yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

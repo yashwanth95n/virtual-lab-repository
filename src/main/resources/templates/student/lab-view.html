@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title th:text="${lab.title}">Lab</title><link rel="stylesheet" th:href="@{/css/style.css}"/></head>
+<body>
+<div th:replace="~{fragments/layout :: student-sidebar(${activePage})}"></div>
+<div class="main">
+  <div th:replace="~{fragments/layout :: topbar(${lab.title}, ${student})}"></div>
+  <div class="content">
+    <div class="form-card" style="max-width:900px">
+      <p th:text="${lab.description}" class="mb-2">Desc</p>
+      <p class="text-sm text-muted" th:if="${lab.dueDate != null}" th:text="'Due: ' + ${#temporals.format(lab.dueDate,'MMM d, yyyy')}">Due</p>
+      <div th:if="${lab.filePath}" style="margin:16px 0">
+        <iframe th:src="${lab.filePath}" style="width:100%;height:65vh;border:1px solid #e2e8f0;border-radius:12px"></iframe>
+        <a th:href="${lab.filePath}" target="_blank" class="btn btn-outline btn-sm mt-2">View PDF</a>
+      </div>
+      <h3 class="mt-3 mb-2">Upload your solution</h3>
+      <form method="post" th:action="@{/student/labs/{id}/submit(id=${lab.id})}" enctype="multipart/form-data">
+        <div class="form-group"><input type="file" name="solutionFile" accept=".pdf,.doc,.docx,.txt" required/></div>
+        <button type="submit" class="btn btn-primary">Submit solution</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

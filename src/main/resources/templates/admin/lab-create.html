@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title>Create Lab</title><link rel="stylesheet" th:href="@{/css/style.css}"/></head>
+<body>
+<div th:replace="~{fragments/layout :: admin-sidebar(${activePage})}"></div>
+<div class="main">
+  <div th:replace="~{fragments/layout :: topbar('Create Lab', ${admin})}"></div>
+  <div class="content">
+    <div class="form-card" style="max-width:640px">
+      <form method="post" th:action="@{/admin/labs/create}" enctype="multipart/form-data">
+        <div class="form-group"><label>Title *</label><input type="text" name="title" required/></div>
+        <div class="form-group"><label>Branch *</label>
+          <select name="branch" required>
+            <option th:each="b : ${branches}" th:value="${b.code}" th:text="${b.code}">CS</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Description</label><textarea name="description"></textarea></div>
+        <div class="form-group"><label>Date of completion</label><input type="date" name="dueDate"/></div>
+        <div class="form-group"><label>Upload PDF / DOC / TXT</label>
+          <input type="file" name="file" accept=".pdf,.doc,.docx,.txt"/>
+        </div>
+        <button type="submit" class="btn btn-primary">Publish Lab</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

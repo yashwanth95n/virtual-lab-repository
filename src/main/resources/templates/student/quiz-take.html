@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><title th:text="${quiz.title}">Quiz</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+  <div th:replace="~{fragments/layout :: student-sidebar(${activePage})}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar(${quiz.title}, ${student})}"></div>
+    <div class="content">
+      <p class="text-sm text-muted mb-2" th:text="'Attempts used: ' + ${used} + ' / ' + ${max} + ' (max 2 unless admin grants more)'">Attempts</p>
+      <form method="post" th:action="@{/student/quiz/{id}/submit(id=${quiz.id})}" class="form-card" style="max-width:720px;" id="quizForm">
+        <div th:each="q,stat : ${questions}" class="question-block">
+          <h5 th:text="'Q' + ${stat.count} + '. ' + ${q.questionText}">Question</h5>
+          <label style="display:block;margin:6px 0;"><input type="radio" th:name="'q_' + ${q.id}" value="A" required/> A. <span th:text="${q.optionA}"></span></label>
+          <label style="display:block;margin:6px 0;"><input type="radio" th:name="'q_' + ${q.id}" value="B"/> B. <span th:text="${q.optionB}"></span></label>
+          <label style="display:block;margin:6px 0;"><input type="radio" th:name="'q_' + ${q.id}" value="C"/> C. <span th:text="${q.optionC}"></span></label>
+          <label style="display:block;margin:6px 0;"><input type="radio" th:name="'q_' + ${q.id}" value="D"/> D. <span th:text="${q.optionD}"></span></label>
+        </div>
+        <div th:if="${#lists.isEmpty(questions)}" class="text-muted">No questions in this quiz.</div>
+        <div class="flex gap-2 mt-3" th:if="${!#lists.isEmpty(questions)}">
+          <button type="submit" class="btn btn-primary" name="action" value="submit">Submit quiz</button>
+        </div>
+        <p class="hint mt-2">After submit you can retake if attempts remain (max 2). Final submit after last attempt locks the quiz until admin grants more attempts.</p>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

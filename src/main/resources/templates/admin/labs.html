@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title>Labs</title><link rel="stylesheet" th:href="@{/css/style.css}"/></head>
+<body>
+<div th:replace="~{fragments/layout :: admin-sidebar(${activePage})}"></div>
+<div class="main">
+  <div th:replace="~{fragments/layout :: topbar('Labs', ${admin})}"></div>
+  <div class="content">
+    <div class="toolbar" style="flex-wrap:wrap;gap:8px">
+      <a th:href="@{/admin/labs}" class="btn" th:classappend="${branch == null} ? 'btn-primary' : 'btn-outline'">All</a>
+      <a th:each="b : ${branches}" th:href="@{/admin/labs(branch=${b.code})}"
+         class="btn" th:classappend="${b.code == branch} ? 'btn-primary' : 'btn-outline'" th:text="${b.code}">CS</a>
+      <a th:href="@{/admin/labs/create}" class="btn btn-primary" style="margin-left:auto">+ Create Lab</a>
+      <a th:href="@{/admin/labs/submissions}" class="btn btn-outline">Submissions</a>
+    </div>
+    <div class="course-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div th:each="l : ${labs}" class="course-card">
+        <div class="card-art art-green"><span>🔬</span></div>
+        <div class="card-body">
+          <h3 th:text="${l.title}">Lab</h3>
+          <div class="card-meta" th:text="${l.branch + (l.dueDate != null ? ' · due ' + #temporals.format(l.dueDate,'MMM d') : '')}">CS</div>
+          <div class="card-footer">
+            <span class="badge badge-published" th:text="${l.status}">Published</span>
+            <a th:if="${l.filePath}" th:href="${l.filePath}" target="_blank" class="btn btn-outline btn-sm">Open</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p th:if="${#lists.isEmpty(labs)}" class="text-muted">No labs yet.</p>
+  </div>
+</div>
+</body>
+</html>

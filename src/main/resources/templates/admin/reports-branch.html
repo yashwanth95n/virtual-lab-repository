@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><title>Branch Reports</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+  <div th:replace="~{fragments/layout :: admin-sidebar(${activePage})}"></div>
+  <div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Branch-wise Reports', ${admin})}"></div>
+    <div class="content">
+      <div class="toolbar" style="flex-wrap:wrap;gap:8px">
+        <a th:each="b : ${branches}"
+           th:href="@{/admin/reports/branch(branch=${b.code},type=${type})}"
+           class="btn" th:classappend="${b.code == branch} ? 'btn-primary' : 'btn-outline'"
+           th:text="${b.code}">CS</a>
+      </div>
+      <div th:if="${branch == null}" class="text-muted mt-2">Select a branch above.</div>
+      <div th:if="${branch != null}">
+        <h3 class="mb-2" th:text="'Reports for branch: ' + ${branch}">Branch</h3>
+        <div class="report-grid">
+          <a th:href="@{/admin/reports/branch(branch=${branch},type='student')}" class="report-card" th:classappend="${type == 'student'} ? 'active'" style="text-decoration:none;color:inherit">
+            <h4>Student report</h4>
+            <div class="rows" th:text="${students != null ? students.size() : 0} + ' rows'">0</div>
+          </a>
+          <a th:href="@{/admin/reports/branch(branch=${branch},type='course')}" class="report-card" th:classappend="${type == 'course'} ? 'active'" style="text-decoration:none;color:inherit">
+            <h4>Course report</h4>
+            <div class="rows" th:text="${courses != null ? courses.size() : 0} + ' rows'">0</div>
+          </a>
+          <a th:href="@{/admin/reports/branch(branch=${branch},type='enrollment')}" class="report-card" th:classappend="${type == 'enrollment'} ? 'active'" style="text-decoration:none;color:inherit">
+            <h4>Enrollment report</h4>
+            <div class="rows" th:text="${enrollments != null ? enrollments.size() : 0} + ' rows'">0</div>
+          </a>
+          <a th:href="@{/admin/reports/branch(branch=${branch},type='progress')}" class="report-card" th:classappend="${type == 'progress'} ? 'active'" style="text-decoration:none;color:inherit">
+            <h4>Progress report</h4>
+            <div class="rows" th:text="${enrollments != null ? enrollments.size() : 0} + ' rows'">0</div>
+          </a>
+          <a th:href="@{/admin/reports/branch(branch=${branch},type='assignment')}" class="report-card" th:classappend="${type == 'assignment'} ? 'active'" style="text-decoration:none;color:inherit">
+            <h4>Assignment report</h4>
+            <div class="rows" th:text="${assignments != null ? assignments.size() : 0} + ' rows'">0</div>
+          </a>
+          <a th:href="@{/admin/reports/branch(branch=${branch},type='quiz')}" class="report-card" th:classappend="${type == 'quiz'} ? 'active'" style="text-decoration:none;color:inherit">
+            <h4>Quiz report</h4>
+            <div class="rows" th:text="${attempts != null ? attempts.size() : 0} + ' rows'">0</div>
+          </a>
+          <a th:href="@{/admin/reports/branch(branch=${branch},type='grade')}" class="report-card" th:classappend="${type == 'grade'} ? 'active'" style="text-decoration:none;color:inherit">
+            <h4>Grade report</h4>
+            <div class="rows" th:text="${attempts != null ? attempts.size() : 0} + ' rows'">0</div>
+          </a>
+        </div>
+        <div class="table-card">
+          <h3 th:text="${#strings.capitalize(type) + ' preview — ' + branch}">Preview</h3>
+          <table th:if="${type == 'student'}">
+            <thead><tr><th>Name</th><th>Roll</th><th>Email</th><th>Year</th></tr></thead>
+            <tbody>
+              <tr th:each="s : ${students}">
+                <td th:text="${s.name}">N</td>
+                <td th:text="${s.rollNo}">R</td>
+                <td th:text="${s.email}">E</td>
+                <td th:text="${s.academicYear}">Y</td>
+              </tr>
+            </tbody>
+          </table>
+          <table th:if="${type == 'course'}">
+            <thead><tr><th>Course</th><th>Enrolled</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr th:each="c : ${courses}">
+                <td th:text="${c.title}">T</td>
+                <td th:text="${c.enrolledCount}">0</td>
+                <td th:text="${c.status}">P</td>
+              </tr>
+            </tbody>
+          </table>
+          <table th:if="${type == 'enrollment' or type == 'progress'}">
+            <thead><tr><th>Student</th><th>Course</th><th>Status</th><th>Progress</th></tr></thead>
+            <tbody>
+              <tr th:each="e : ${enrollments}">
+                <td th:text="${e.studentName}">S</td>
+                <td th:text="${e.courseTitle}">C</td>
+                <td th:text="${e.status}">A</td>
+                <td th:text="${e.progress + '%'}">0%</td>
+              </tr>
+              <tr th:if="${enrollments == null or #lists.isEmpty(enrollments)}"><td colspan="4" class="text-muted">No enrollments.</td></tr>
+            </tbody>
+          </table>
+          <table th:if="${type == 'assignment'}">
+            <thead><tr><th>Title</th><th>Course</th><th>Submitted</th></tr></thead>
+            <tbody>
+              <tr th:each="a : ${assignments}">
+                <td th:text="${a.title}">T</td>
+                <td th:text="${a.courseTitle}">C</td>
+                <td th:text="${a.submissions}">0</td>
+              </tr>
+            </tbody>
+          </table>
+          <table th:if="${type == 'quiz' or type == 'grade'}">
+            <thead><tr><th>Student</th><th>Quiz</th><th>Score</th><th>Grade</th></tr></thead>
+            <tbody>
+              <tr th:each="a : ${attempts}">
+                <td th:text="${a.studentName}">S</td>
+                <td th:text="${a.quizTitle}">Q</td>
+                <td th:text="${a.score + '/' + a.total}">0/0</td>
+                <td th:text="${a.letterGrade}">A</td>
+              </tr>
+              <tr th:if="${attempts == null or #lists.isEmpty(attempts)}"><td colspan="4" class="text-muted">No attempts.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

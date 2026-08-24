@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title>Create Exam</title><link rel="stylesheet" th:href="@{/css/style.css}"/></head>
+<body>
+<div th:replace="~{fragments/layout :: admin-sidebar(${activePage})}"></div>
+<div class="main">
+  <div th:replace="~{fragments/layout :: topbar('Create Exam', ${admin})}"></div>
+  <div class="content">
+    <div class="form-card" style="max-width:720px">
+      <form method="post" th:action="@{/admin/exams/create}" enctype="multipart/form-data">
+        <div class="form-group"><label>Exam name *</label><input type="text" name="title" required/>
+          <div class="form-group">
+            <label>Subject</label>
+            <input type="text" name="subject" placeholder="e.g. Data Structures" required/>
+          </div></div>
+        <div class="form-group"><label>Branch *</label>
+          <select name="branch" required>
+            <option th:each="b : ${branches}" th:value="${b.code}" th:text="${b.code}">CS</option>
+            <option value="All">All</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Duration (minutes)</label><input type="number" name="durationMinutes" value="60"/></div>
+        <div class="form-group"><label>Cover</label><input type="file" name="coverFile" accept="image/*"/></div>
+        <div class="form-group"><label>Instructions</label><textarea name="instructions" rows="3"></textarea></div>
+        <div class="form-group"><label>Upload question PDF / TXT</label>
+          <input type="file" name="questionFile" accept=".txt,.pdf,.doc,.docx"/>
+          <div class="hint">Supports: <code>1. What is TCP?</code> or <code>Q1: … A: B: C: D: ANS:</code></div>
+        </div>
+        <div class="form-group"><label>Or paste questions</label>
+          <textarea name="pasteContent" rows="8" placeholder="1. What is TCP?&#10;2. Explain DNS.&#10;&#10;or&#10;&#10;Q1: …&#10;A: …&#10;ANS: A"></textarea>
+        </div>
+        <div class="form-group">
+          <label>How many questions for this exam? (0 = all extracted)</label>
+          <input type="number" name="questionLimit" value="20" min="0"/>
+          <div class="hint">If PDF has 100 questions and you set 20, 20 are chosen at random. Bank size: <span th:text="${bankCount}">0</span></div>
+        </div>
+        <div class="form-group"><label>Topic (for question bank)</label><input type="text" name="topic" placeholder="Networking"/></div>
+        <div class="form-group"><label><input type="checkbox" name="saveToBank" value="true"/> Save extracted questions to question bank</label></div>
+        <button type="submit" class="btn btn-primary">Publish Exam</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

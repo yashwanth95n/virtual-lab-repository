@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title>Student Performance</title><link rel="stylesheet" th:href="@{/css/style.css}"/></head>
+<body>
+<div th:replace="~{fragments/layout :: admin-sidebar(${activePage})}"></div>
+<div class="main">
+  <div th:replace="~{fragments/layout :: topbar('Student Performance', ${admin})}"></div>
+  <div class="content">
+    <div class="toolbar" style="flex-wrap:wrap;gap:8px">
+      <a th:href="@{/admin/reports/student}" class="btn" th:classappend="${branch == null} ? 'btn-primary' : 'btn-outline'">All</a>
+      <a th:each="b : ${branches}" th:href="@{/admin/reports/student(branch=${b.code},q=${q})}"
+         class="btn" th:classappend="${b.code == branch} ? 'btn-primary' : 'btn-outline'" th:text="${b.code}">CS</a>
+      <form method="get" th:action="@{/admin/reports/student}" style="margin-left:auto;display:flex;gap:8px">
+        <input type="hidden" name="branch" th:value="${branch}"/>
+        <input type="search" name="q" th:value="${q}" class="search-box" placeholder="Search name, roll, email…"/>
+        <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+    </div>
+    <div class="table-card">
+      <table>
+        <thead><tr><th>Student</th><th>Roll</th><th>Branch</th><th>Course %</th><th>Quiz %</th><th>Overall</th><th>Grade</th><th>Flag</th></tr></thead>
+        <tbody>
+          <tr th:each="r : ${rows}">
+            <td>
+              <div class="user-cell">
+                <span class="uname" th:text="${r.student.name}">Name</span>
+                <span class="uemail" th:text="${r.student.email}">email</span>
+              </div>
+            </td>
+            <td th:text="${r.student.rollNo}">Roll</td>
+            <td th:text="${r.student.branch}">CS</td>
+            <td th:text="${r.courseAvg + '%'}">0%</td>
+            <td th:text="${r.quizAvg + '%'}">0%</td>
+            <td th:text="${r.overall + '%'}">0%</td>
+            <td th:text="${r.grade}">A</td>
+            <td>
+              <span th:if="${r.flag}" class="badge badge-suspended">Improve</span>
+              <span th:unless="${r.flag}" class="badge badge-active">OK</span>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(rows)}"><td colspan="8" class="text-muted">No students found.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>
