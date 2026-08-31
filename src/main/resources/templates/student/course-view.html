@@ -65,35 +65,69 @@
           <iframe th:src="${m.filePath + '#toolbar=0&navpanes=0&scrollbar=1'}"
                   title="PDF"></iframe>
           <div class="mt-2">
-            <!-- "Open in new tab" link intentionally removed: it linked
-                 straight to the raw file, bypassing the toolbar restriction. -->
-            <form th:if="${!completedIds.contains(m.id)}"
-                  th:action="@{/student/course/{cid}/material/{mid}/complete(cid=${course.id},mid=${m.id})}"
-                  method="post" style="display:inline">
-              <button type="submit" class="btn btn-primary btn-sm">Mark completed</button>
-            </form>
-          </div>
+  <form th:if="${!completedIds.contains(m.id)}"
+        th:action="@{/student/course/{cid}/material/{mid}/complete(cid=${course.id},mid=${m.id})}"
+        method="post" style="display:inline">
+    <button type="submit" class="btn btn-primary btn-sm mark-complete-btn"
+            th:attr="data-cid=${course.id},data-mid=${m.id}"
+            disabled>Mark completed</button>
+    <span class="timer-label" th:attr="data-mid=${m.id}" style="margin-left:8px;font-size:0.85em;color:#64748b"></span>
+  </form>
+</div>
         </div>
 
         <div th:if="${m.type == 'NOTE'}">
-          <pre th:text="${m.content}" style="white-space:pre-wrap;background:#f8fafc;padding:16px;border-radius:12px;max-height:70vh;overflow:auto"
-               oncontextmenu="return false"></pre>
-          <form th:if="${!completedIds.contains(m.id)}"
-                th:action="@{/student/course/{cid}/material/{mid}/complete(cid=${course.id},mid=${m.id})}"
-                method="post" class="mt-2">
-            <button type="submit" class="btn btn-primary btn-sm">Mark completed</button>
-          </form>
-        </div>
+  <pre th:text="${m.content}" style="white-space:pre-wrap;background:#f8fafc;padding:16px;border-radius:12px;max-height:70vh;overflow:auto"
+       oncontextmenu="return false"></pre>
+  <form th:if="${!completedIds.contains(m.id)}"
+        th:action="@{/student/course/{cid}/material/{mid}/complete(cid=${course.id},mid=${m.id})}"
+        method="post" class="mt-2">
+    <button type="submit" class="btn btn-primary btn-sm mark-complete-btn"
+            th:attr="data-cid=${course.id},data-mid=${m.id}"
+            disabled>Mark completed</button>
+    <span class="timer-label" th:attr="data-mid=${m.id}" style="margin-left:8px;font-size:0.85em;color:#64748b"></span>
+  </form>
+</div>
       </div>
       <div th:if="${#lists.isEmpty(materials)}" class="text-muted">No materials yet.</div>
     </div>
   </div>
   <script th:src="@{/js/pdf-guard.js}"></script>
-  <script>
-    function markVideoDone(el) {
-      fetch('/student/course/' + el.getAttribute('data-cid') + '/material/' + el.getAttribute('data-mid') + '/complete', {method:'POST'})
-        .then(() => location.reload());
-    }
-  </script>
+<script>
+  function markVideoDone(el) {
+    fetch('/student/course/' + el.getAttribute('data-cid') + '/material/' + el.getAttribute('data-mid') + '/complete', {method:'POST'})
+      .then(() => location.reload());
+  }
+
+  // Timer-gated "Mark completed" for PDF and NOTE materials
+  document.querySelectorAll('.mark-complete-btn').forEach(function (btn) {
+    var mid = btn.getAttribute('data-mid');
+    var cid = btn.getAttribute('data-cid');
+    var label = document.querySelector('.timer-label[data-mid="' + mid + '"]');
+
+    fetch('/student/course/' + cid + '/material/' + mid + '/start', { method: 'POST' })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        var remaining = data.remainingSeconds;
+        if (remaining === undefined) { btn.disabled = false; return; }
+
+        function tick() {
+          if (remaining <= 0) {
+            btn.disabled = false;
+            if (label) label.textContent = 'Ready to mark as complete.';
+            clearInterval(timer);
+            return;
+          }
+          var m = Math.floor(remaining / 60);
+          var s = remaining % 60;
+          if (label) label.textContent = 'Available in ' + m + ':' + String(s).padStart(2, '0');
+          remaining--;
+        }
+        tick();
+        var timer = setInterval(tick, 1000);
+      })
+      .catch(function () { btn.disabled = false; });
+  });
+</script>
 </body>
 </html>
