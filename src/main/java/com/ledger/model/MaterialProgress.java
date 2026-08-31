@@ -1,5 +1,4 @@
 package com.ledger.model;
-
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -14,6 +13,7 @@ public class MaterialProgress {
     private Long materialId;
     private boolean completed;
     private LocalDateTime completedAt;
+    private LocalDateTime startedAt;
 
     public MaterialProgress() {}
     public Long getId() { return id; }
@@ -28,4 +28,6 @@ public class MaterialProgress {
     public void setCompleted(boolean completed) { this.completed = completed; }
     public LocalDateTime getCompletedAt() { return completedAt; }
     public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
+    public LocalDateTime getStartedAt() { return startedAt; }
+    public void setStartedAt(LocalDateTime startedAt) { this.startedAt = startedAt; }
 }
