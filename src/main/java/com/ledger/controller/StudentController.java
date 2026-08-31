@@ -104,7 +104,6 @@ public class StudentController {
         User student = requireStudent(session);
         if (student == null) return "redirect:/student/login";
         List<Enrollment> myEnrollments = enrollmentRepo.findByStudentId(student.getId());
-        // Top 3 courses by progress (highest first)
         List<Enrollment> topCourses = myEnrollments.stream()
                 .sorted(Comparator.comparingInt(Enrollment::getProgress).reversed())
                 .limit(3)
@@ -116,18 +115,15 @@ public class StudentController {
                 .filter(c -> br == null || br.isBlank() || br.equalsIgnoreCase(c.getCategory()))
                 .collect(Collectors.toList());
         List<QuizAttempt> attempts = quizAttemptRepo.findByStudentId(student.getId());
-        // Only the single most recent quiz attempt on dashboard
         List<QuizAttempt> latestQuizAttempts = attempts.stream()
                 .sorted(Comparator.comparing(QuizAttempt::getAttemptedAt, Comparator.nullsLast(Comparator.reverseOrder())))
                 .limit(1)
                 .collect(Collectors.toList());
-        // Only the single most recent exam attempt on dashboard
         List<ExamAttempt> examResults = examAttemptRepo.findByStudentId(student.getId()).stream()
                 .filter(a -> a.getTotal() > 0)
                 .sorted(Comparator.comparing(ExamAttempt::getSubmittedAt, Comparator.nullsLast(Comparator.reverseOrder())))
                 .limit(1)
                 .collect(Collectors.toList());
-        // Overall grade from latest graded exam only (20-mark scale)
         String overallGrade = "—";
         if (!examResults.isEmpty() && examResults.get(0).getLetterGrade() != null
                 && !"—".equals(examResults.get(0).getLetterGrade())) {
@@ -171,7 +167,6 @@ public class StudentController {
                 .collect(Collectors.toList());
         Set<Long> enrolledIds = enrollmentRepo.findByStudentId(student.getId()).stream()
                 .map(Enrollment::getCourseId).collect(Collectors.toSet());
-        // filter: all | enrolled
         if ("enrolled".equalsIgnoreCase(filter)) {
             published = published.stream().filter(c -> enrolledIds.contains(c.getId())).collect(Collectors.toList());
         }
@@ -268,13 +263,47 @@ public class StudentController {
         return "student/course-view";
     }
 
+    @PostMapping("/course/{courseId}/material/{materialId}/start")
+    @ResponseBody
+    public Map<String, Object> startMaterial(@PathVariable Long courseId, @PathVariable Long materialId,
+                                              HttpSession session) {
+        User student = requireStudent(session);
+        if (student == null) {
+            return Map.of("error", "unauthorized");
+        }
+        MaterialProgress mp = materialProgressRepo.findByStudentIdAndMaterialId(student.getId(), materialId)
+                .orElseGet(MaterialProgress::new);
+
+        // Already completed — no need to gate it again
+        if (mp.isCompleted()) {
+            return Map.of("remainingSeconds", 0);
+        }
+
+        // Reset the 5-minute timer every time the material is opened
+        mp.setStudentId(student.getId());
+        mp.setCourseId(courseId);
+        mp.setMaterialId(materialId);
+        mp.setStartedAt(LocalDateTime.now());
+        materialProgressRepo.save(mp);
+
+        return Map.of("remainingSeconds", 300);
+    }
+
     @PostMapping("/course/{courseId}/material/{materialId}/complete")
     public String completeMaterial(@PathVariable Long courseId, @PathVariable Long materialId,
                                    HttpSession session) {
         User student = requireStudent(session);
         if (student == null) return "redirect:/student/login";
+
         MaterialProgress mp = materialProgressRepo.findByStudentIdAndMaterialId(student.getId(), materialId)
                 .orElse(new MaterialProgress());
+
+        // Block completion unless 5 minutes have passed since the material was last opened
+        if (mp.getStartedAt() == null
+                || java.time.Duration.between(mp.getStartedAt(), LocalDateTime.now()).getSeconds() < 300) {
+            return "redirect:/student/course/" + courseId + "/material/" + materialId + "?wait=1";
+        }
+
         mp.setStudentId(student.getId());
         mp.setCourseId(courseId);
         mp.setMaterialId(materialId);
@@ -379,7 +408,7 @@ public class StudentController {
         return "redirect:/student/assessments";
     }
 
-    
+
     @PostMapping("/assessments/submission/{id}/delete")
     public String deleteSubmission(@PathVariable Long id, HttpSession session) {
         User student = requireStudent(session);
@@ -414,12 +443,6 @@ public class StudentController {
 
         int max = quiz.getMaxAttempts() > 0 ? quiz.getMaxAttempts() : 2;
 
-        /*
-         * Quiz rule:
-         * - Maximum 2 attempts.
-         * - If the first attempt is >= 70%, no second attempt.
-         * - If the first attempt is < 70%, second attempt is allowed.
-         */
         boolean firstAttemptPassed = !quizAttempts.isEmpty()
                 && quizAttempts.get(0).getPercent() >= 70;
 
@@ -437,7 +460,6 @@ public class StudentController {
                 .filter(q -> q.getQuiz() != null && q.getQuiz().getId().equals(id))
                 .collect(Collectors.toList());
 
-        // Always randomize order for each student attempt
         Collections.shuffle(questions);
 
         model.addAttribute("student", student);
@@ -458,7 +480,6 @@ public class StudentController {
         Quiz quiz = quizRepo.findById(id).orElse(null);
         if (quiz == null) return "redirect:/student/assessments";
 
-        // Enforce maximum 2 attempts and the 70% first-attempt rule
         List<QuizAttempt> previousAttempts = quizAttemptRepo.findByStudentId(student.getId()).stream()
                 .filter(a -> id.equals(a.getQuizId()))
                 .sorted(Comparator.comparing(
@@ -495,7 +516,7 @@ public class StudentController {
         }
         int total = questions.size();
         double percent = GradeUtil.isGradable(total) ? GradeUtil.percentFromMarks(correct, total) : -1;
-        String letter = "—"; // no letter grade for quizzes
+        String letter = "—";
 
         QuizAttempt attempt = new QuizAttempt();
         attempt.setQuizId(quiz.getId());
@@ -544,10 +565,9 @@ public class StudentController {
                 .filter(a -> publishedExamIds.contains(a.getExamId()))
                 .filter(a -> "Submitted".equals(a.getStatus()) || "Blocked".equals(a.getStatus()))
                 .collect(Collectors.toList());
-        // only published exam results
         double coursePct = enrollments.stream().mapToInt(Enrollment::getProgress).average().orElse(0);
         double quizPct = attempts.stream().filter(a -> a.getPercent() >= 0).mapToDouble(QuizAttempt::getPercent).average().orElse(0);
-        double assignPct = submissions.isEmpty() ? 0 : 100.0; // submitted = complete for simple metric
+        double assignPct = submissions.isEmpty() ? 0 : 100.0;
         double examPct = examAttempts.stream().filter(a -> a.getPercent() >= 0).mapToDouble(ExamAttempt::getPercent).average().orElse(0);
         double overall = (coursePct + quizPct + assignPct + examPct) / 4.0;
         model.addAttribute("student", student);
@@ -560,7 +580,6 @@ public class StudentController {
         model.addAttribute("assignPct", (int) Math.round(assignPct));
         model.addAttribute("examPct", (int) Math.round(examPct));
         model.addAttribute("overallPct", (int) Math.round(overall));
-        // Grade only from published 20-mark exams
         String reportGrade = "—";
         if (!examAttempts.isEmpty()) {
             ExamAttempt latestGraded = examAttempts.stream()
@@ -641,7 +660,6 @@ public class StudentController {
         if (student == null) return "redirect:/student/login";
         model.addAttribute("student", student);
         model.addAttribute("messages", chatRepo.findByFromUserIdOrderBySentAtAsc(student.getId()));
-        // also messages to this student from admin
         List<ChatMessage> all = chatRepo.findAll().stream()
                 .filter(m -> student.getId().equals(m.getFromUserId()) || student.getId().equals(m.getToUserId()))
                 .sorted(Comparator.comparing(ChatMessage::getSentAt, Comparator.nullsLast(Comparator.naturalOrder())))
@@ -735,7 +753,6 @@ public class StudentController {
         if (vm == null || !student.getId().equals(vm.getAssignedStudentId())) {
             return "redirect:/student/lab";
         }
-        // Already running
         if (vm.getNovncUrl() != null && vm.getContainerId() != null) {
             return "redirect:" + vm.getNovncUrl();
         }
@@ -782,7 +799,6 @@ public class StudentController {
 
     @GetMapping("/lab/{id}/launch-get")
     public String studentLaunchGet(@PathVariable Long id, HttpSession session) {
-        // Allow GET open path to trigger same as POST when needed
         return "redirect:/student/lab";
     }
 
