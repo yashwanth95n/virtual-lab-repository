@@ -4,7 +4,6 @@
 - Separate **Admin** and **Student** portals
 - MySQL storage for all entities
 - **BCrypt** password hashing (admin + student)
-- **Email OTP** (6 digits) on registration
 - **Password reset** via email code
 - **Firebase Google Sign-In** (optional; password login always available)
 - Student portal **enable/disable** from Admin → Profile
